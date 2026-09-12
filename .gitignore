@@ -1,0 +1,11 @@
+# PlatformIO
+.pio
+.vscode
+.idea
+
+# Secrets
+include/secrets.h
+
+# OS generated
+.DS_Store
+Thumbs.db
