@@ -1,0 +1,1467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NEXORA — 5 Premium UI Themes & Color Palettes Preview</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700;800&family=Outfit:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #080a0f;
+      --panel-bg: #0f141e;
+      --border-color: #1e2638;
+      --text-main: #f1f5f9;
+      --text-muted: #8492a6;
+      --accent-glow: rgba(0, 245, 255, 0.15);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: 'Inter', -apple-system, sans-serif;
+      min-height: 100vh;
+      padding: 30px 20px;
+      line-height: 1.5;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 36px;
+    }
+
+    .brand-tag {
+      display: inline-block;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      padding: 5px 12px;
+      background: rgba(56, 189, 248, 0.1);
+      color: #38bdf8;
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      border-radius: 20px;
+      margin-bottom: 12px;
+    }
+
+    h1 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 32px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, #ffffff 40%, #94a3b8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      color: var(--text-muted);
+      font-size: 15px;
+      max-width: 620px;
+      margin: 0 auto;
+    }
+
+    /* Controls Bar */
+    .controls-wrapper {
+      background: var(--panel-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 16px 20px;
+      margin-bottom: 30px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    }
+
+    .theme-selector {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .theme-btn {
+      background: #151b28;
+      border: 1px solid var(--border-color);
+      color: #94a3b8;
+      padding: 10px 16px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .theme-btn:hover {
+      background: #1c2436;
+      color: #f1f5f9;
+      border-color: #334155;
+    }
+
+    .theme-btn.active {
+      background: #1e293b;
+      color: #ffffff;
+      border-color: #38bdf8;
+      box-shadow: 0 0 16px rgba(56, 189, 248, 0.25);
+    }
+
+    .swatch-dots {
+      display: flex;
+      gap: 4px;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+
+    .view-modes {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .page-tab {
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--text-muted);
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .page-tab:hover {
+      color: #fff;
+    }
+
+    .page-tab.active {
+      background: #1e2638;
+      color: #38bdf8;
+      border-color: rgba(56, 189, 248, 0.3);
+    }
+
+    /* Hardware Simulator Device Frame */
+    .device-stage {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 40px;
+    }
+
+    .device-chassis {
+      background: linear-gradient(145deg, #1e222d, #0d1017);
+      border: 3px solid #2b3245;
+      padding: 24px;
+      border-radius: 24px;
+      box-shadow: 0 25px 60px rgba(0,0,0,0.8), 0 0 40px rgba(0, 245, 255, 0.05);
+      position: relative;
+    }
+
+    .device-header-plate {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      padding: 0 4px;
+    }
+
+    .device-brand {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 12px;
+      letter-spacing: 3px;
+      color: #64748b;
+      font-weight: 700;
+    }
+
+    .power-led {
+      width: 7px;
+      height: 7px;
+      background: #10b981;
+      border-radius: 50%;
+      box-shadow: 0 0 8px #10b981;
+    }
+
+    /* Screen Canvas (Exact 480x320 ILI9488 native dimension) */
+    .tft-screen {
+      width: 480px;
+      height: 320px;
+      background: #000;
+      border-radius: 4px;
+      overflow: hidden;
+      position: relative;
+      user-select: none;
+      box-shadow: inset 0 0 10px rgba(0,0,0,0.8);
+      font-smooth: never;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Screen Header Bar (32px high) */
+    .tft-header {
+      height: 32px;
+      border-bottom: 1px solid;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 12px;
+      font-size: 13px;
+    }
+
+    .tft-header .page-title {
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .tft-header .carousel-dots {
+      display: flex;
+      gap: 6px;
+    }
+
+    .tft-header .c-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      border: 1px solid;
+    }
+
+    .tft-header .c-dot.active {
+      background: currentColor;
+    }
+
+    .tft-header .status-indicators {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+    }
+
+    .wifi-bars {
+      display: flex;
+      align-items: flex-end;
+      gap: 2px;
+      height: 12px;
+    }
+
+    .w-bar {
+      width: 3px;
+      border-radius: 1px;
+    }
+
+    .w-bar:nth-child(1) { height: 4px; }
+    .w-bar:nth-child(2) { height: 8px; }
+    .w-bar:nth-child(3) { height: 12px; }
+
+    /* Screen Content Canvas (480 x 288) */
+    .tft-body {
+      height: 288px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    /* Main Dashboard Layout (Digital Clock Hub + Today's Weather Below) */
+    .dashboard-layout {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .dashboard-clock-card {
+      flex: 1.05;
+      border: 1px solid;
+      border-radius: 8px;
+      padding: 8px 14px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+    }
+
+    .clock-top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+
+    .clock-center-time {
+      display: flex;
+      justify-content: center;
+      align-items: baseline;
+      gap: 8px;
+      margin: 2px 0;
+    }
+
+    .digital-time {
+      font-family: 'Space Grotesk', 'JetBrains Mono', monospace;
+      font-size: 46px;
+      font-weight: 800;
+      line-height: 1;
+      letter-spacing: 2px;
+    }
+
+    .digital-secs-box {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 1px;
+    }
+
+    .digital-secs {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 22px;
+      font-weight: 700;
+      line-height: 1;
+      opacity: 0.9;
+    }
+
+    .digital-mode-tag {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      opacity: 0.7;
+    }
+
+    .clock-bottom-bar {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .full-date-text {
+      text-align: center;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+
+    .glance-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 10px;
+      opacity: 0.75;
+    }
+
+    /* Today's Weather Below */
+    .dashboard-weather-card {
+      flex: 1.15;
+      border: 1px solid;
+      border-radius: 8px;
+      padding: 8px 14px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .weather-card-header {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      opacity: 0.8;
+      margin-bottom: 2px;
+    }
+
+    .weather-card-content {
+      display: flex;
+      gap: 12px;
+      height: 100%;
+      align-items: center;
+    }
+
+    .weather-left-col {
+      flex: 1.1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding-right: 8px;
+      border-right: 1px solid rgba(255, 255, 255, 0.1);
+      height: 100%;
+    }
+
+    .weather-temp-huge {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 30px;
+      font-weight: 800;
+      line-height: 1;
+    }
+
+    .weather-condition-label {
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .weather-extra-info {
+      font-size: 10px;
+      opacity: 0.75;
+      line-height: 1.3;
+    }
+
+    .weather-right-metrics {
+      flex: 1.3;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 4px;
+      height: 100%;
+    }
+
+    .metric-boxes-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 6px;
+    }
+
+    .dash-metric-box {
+      border: 1px solid;
+      border-radius: 6px;
+      padding: 6px 4px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .dash-metric-box .m-lbl {
+      font-size: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      opacity: 0.65;
+    }
+
+    .dash-metric-box .m-val {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 15px;
+      font-weight: 700;
+      margin: 1px 0;
+    }
+
+    .dash-metric-box .m-unit {
+      font-size: 8px;
+      opacity: 0.6;
+    }
+
+    .weather-live-indicator {
+      font-size: 9px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .live-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: #10b981;
+      box-shadow: 0 0 6px #10b981;
+    }
+
+    /* Legacy Fallback Classes */
+    .clock-layout { height: 100%; display: flex; gap: 12px; }
+    .clock-main-card { flex: 1.4; border: 1px solid; border-radius: 8px; padding: 14px; display: flex; flex-direction: column; justify-content: space-between; }
+    .time-digits { font-family: 'JetBrains Mono', monospace; font-size: 56px; font-weight: 800; line-height: 1; letter-spacing: -1px; }
+    .seconds-pill { font-size: 20px; opacity: 0.8; margin-left: 2px; }
+    .date-row { font-size: 15px; font-weight: 600; display: flex; justify-content: space-between; }
+    .location-tag { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; opacity: 0.7; }
+    .clock-side-col { flex: 1; display: flex; flex-direction: column; gap: 10px; }
+    .mini-widget { flex: 1; border: 1px solid; border-radius: 8px; padding: 10px 12px; display: flex; flex-direction: column; justify-content: space-between; }
+    .widget-label { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; opacity: 0.65; }
+    .widget-val { font-size: 22px; font-weight: 700; font-family: 'JetBrains Mono', monospace; }
+    .widget-sub { font-size: 11px; opacity: 0.8; display: flex; justify-content: space-between; }
+
+    /* Weather Page Layout */
+    .weather-layout {
+      height: 100%;
+      display: flex;
+      gap: 12px;
+    }
+
+    .weather-current {
+      flex: 1;
+      border: 1px solid;
+      border-radius: 8px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .temp-large {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 46px;
+      font-weight: 800;
+      line-height: 1;
+    }
+
+    .weather-grid-col {
+      flex: 1.2;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .metric-cell {
+      border: 1px solid;
+      border-radius: 8px;
+      padding: 8px 10px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    /* Tasks Layout */
+    .tasks-layout {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .task-row {
+      border: 1px solid;
+      border-radius: 6px;
+      padding: 8px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 12px;
+    }
+
+    .priority-badge {
+      font-size: 9px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    /* Timer Layout */
+    .timer-layout {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid;
+      border-radius: 8px;
+      padding: 16px;
+      position: relative;
+    }
+
+    .timer-digits {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 58px;
+      font-weight: 800;
+      letter-spacing: 2px;
+    }
+
+    .timer-bar-wrap {
+      width: 75%;
+      height: 10px;
+      border-radius: 5px;
+      background: rgba(255,255,255,0.1);
+      margin: 14px 0;
+      overflow: hidden;
+    }
+
+    .timer-bar-fill {
+      height: 100%;
+      width: 65%;
+      border-radius: 5px;
+    }
+
+    /* System Status Layout */
+    .status-layout {
+      height: 100%;
+      display: flex;
+      gap: 12px;
+    }
+
+    .status-card {
+      flex: 1;
+      border: 1px solid;
+      border-radius: 8px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      font-size: 11px;
+    }
+
+    .info-line {
+      display: flex;
+      justify-content: space-between;
+      padding: 4px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+
+    /* ==========================================================================
+       THEME STYLES (5 Curated Palettes)
+       ========================================================================== */
+
+    /* THEME 1: Cyber Neon (Electric Cyan & Neon Magenta) */
+    .theme-cyber-neon {
+      --bg: #030712;
+      --card-bg: rgba(15, 23, 42, 0.85);
+      --border: #00f5ff;
+      --accent-1: #00f5ff;       /* Electric Cyan */
+      --accent-2: #ff007f;       /* Neon Magenta */
+      --text-pri: #ffffff;
+      --text-sec: #94a3b8;
+      --glow: 0 0 14px rgba(0, 245, 255, 0.4);
+    }
+
+    /* THEME 2: Tokyo Night (Minimalist Indigo & Soft Lavender) */
+    .theme-tokyo-night {
+      --bg: #0d1117;
+      --card-bg: #161b26;
+      --border: #2e384d;
+      --accent-1: #a78bfa;       /* Soft Lavender */
+      --accent-2: #38bdf8;       /* Ice Blue */
+      --text-pri: #f8fafc;
+      --text-sec: #818cf8;
+      --glow: none;
+    }
+
+    /* THEME 3: Nordic Aurora (Obsidian & Emerald Green) */
+    .theme-nordic-aurora {
+      --bg: #050c09;
+      --card-bg: #0b1913;
+      --border: #143829;
+      --accent-1: #10b981;       /* Emerald */
+      --accent-2: #34d399;       /* Mint */
+      --text-pri: #ecfdf5;
+      --text-sec: #6ee7b7;
+      --glow: 0 0 12px rgba(16, 185, 129, 0.25);
+    }
+
+    /* THEME 4: Titanium Gold (Space Black & Champagne Gold) */
+    .theme-titanium-gold {
+      --bg: #0c0d10;
+      --card-bg: #15171e;
+      --border: #313544;
+      --accent-1: #f59e0b;       /* Warm Gold */
+      --accent-2: #fbbf24;       /* Amber Glow */
+      --text-pri: #fef3c7;
+      --text-sec: #9ca3af;
+      --glow: 0 0 10px rgba(245, 158, 11, 0.2);
+    }
+
+    /* THEME 5: Sunset Horizon (Midnight Violet & Solar Orange) */
+    .theme-sunset-horizon {
+      --bg: #0b0614;
+      --card-bg: #170d28;
+      --border: #3c1e63;
+      --accent-1: #ff6b4a;       /* Solar Orange */
+      --accent-2: #e040fb;       /* Radiant Violet */
+      --text-pri: #ffffff;
+      --text-sec: #f472b6;
+      --glow: 0 0 16px rgba(255, 107, 74, 0.3);
+    }
+
+    /* Applied Theme Tokens to Canvas */
+    .tft-screen {
+      background: var(--bg) !important;
+      color: var(--text-pri) !important;
+    }
+
+    .tft-header {
+      background: var(--card-bg);
+      border-color: var(--border) !important;
+      color: var(--accent-1);
+    }
+
+    .tft-header .c-dot {
+      border-color: var(--border);
+    }
+
+    .tft-header .c-dot.active {
+      background: var(--accent-1);
+      box-shadow: var(--glow);
+    }
+
+    .w-bar {
+      background: var(--accent-1);
+    }
+
+    .dashboard-clock-card, .dashboard-weather-card, .dash-metric-box, .clock-main-card, .mini-widget, .weather-current, .metric-cell, .task-row, .timer-layout, .status-card {
+      background: var(--card-bg);
+      border-color: var(--border) !important;
+    }
+
+    .digital-time, .weather-temp-huge, .m-val, .time-digits, .temp-large, .timer-digits, .widget-val {
+      color: var(--accent-1);
+      text-shadow: var(--glow);
+    }
+
+    .digital-secs, .full-date-text, .date-row, .priority-badge {
+      color: var(--accent-2);
+    }
+
+    .priority-badge {
+      background: rgba(255,255,255,0.08);
+      border: 1px solid var(--border);
+    }
+
+    .timer-bar-fill {
+      background: linear-gradient(90deg, var(--accent-2), var(--accent-1));
+      box-shadow: var(--glow);
+    }
+
+    /* Palette Breakdown Card */
+    .palette-details {
+      background: var(--panel-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 40px;
+    }
+
+    .palette-details h3 {
+      font-size: 18px;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .palette-meta {
+      color: var(--text-muted);
+      font-size: 13px;
+      margin-bottom: 20px;
+    }
+
+    .swatches-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 14px;
+    }
+
+    .swatch-card {
+      background: #151b26;
+      border: 1px solid #232d42;
+      border-radius: 10px;
+      padding: 12px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .swatch-color-box {
+      width: 42px;
+      height: 42px;
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.15);
+      flex-shrink: 0;
+    }
+
+    .swatch-info {
+      overflow: hidden;
+    }
+
+    .swatch-name {
+      font-size: 11px;
+      color: #94a3b8;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+
+    .swatch-hex {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .swatch-rgb565 {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      color: #38bdf8;
+    }
+
+    /* Side-by-Side Comparison Gallery */
+    .gallery-title {
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      text-align: center;
+    }
+
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+      gap: 20px;
+      margin-bottom: 40px;
+    }
+
+    .mini-preview-card {
+      background: var(--panel-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 14px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .mini-preview-card:hover {
+      transform: translateY(-3px);
+      border-color: #38bdf8;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    }
+
+    .mini-preview-card h4 {
+      font-size: 14px;
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .mini-scale-box {
+      width: 100%;
+      height: 200px;
+      overflow: hidden;
+      border-radius: 6px;
+      border: 1px solid #1e293b;
+      position: relative;
+    }
+
+    .mini-scale-inner {
+      transform: scale(0.625);
+      transform-origin: top left;
+      width: 480px;
+      height: 320px;
+      pointer-events: none;
+    }
+
+    /* Selection Action Box */
+    .select-banner {
+      text-align: center;
+      background: linear-gradient(135deg, #0f172a, #1e293b);
+      border: 1px solid #334155;
+      padding: 30px 20px;
+      border-radius: 16px;
+    }
+
+    .select-btn {
+      background: #0284c7;
+      color: #fff;
+      border: none;
+      padding: 14px 28px;
+      font-size: 15px;
+      font-weight: 700;
+      border-radius: 10px;
+      cursor: pointer;
+      box-shadow: 0 4px 20px rgba(2, 132, 199, 0.4);
+      transition: all 0.2s ease;
+    }
+
+    .select-btn:hover {
+      background: #0369a1;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(2, 132, 199, 0.6);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <span class="brand-tag">NEXORA DISPLAY DESIGN SYSTEM</span>
+      <h1>Select Your Preferred Clock UI Design</h1>
+      <p class="subtitle">5 distinct, high-contrast, commercial-grade aesthetic themes crafted specifically for the 3.5" ILI9488 TFT LCD (480 &times; 320 resolution).</p>
+    </header>
+
+    <!-- Top Control Bar -->
+    <div class="controls-wrapper">
+      <div class="theme-selector">
+        <button class="theme-btn active" onclick="switchTheme('cyber-neon')">
+          <span class="swatch-dots">
+            <span class="dot" style="background:#00f5ff;"></span>
+            <span class="dot" style="background:#ff007f;"></span>
+          </span>
+          1. Cyber Neon
+        </button>
+
+        <button class="theme-btn" onclick="switchTheme('tokyo-night')">
+          <span class="swatch-dots">
+            <span class="dot" style="background:#a78bfa;"></span>
+            <span class="dot" style="background:#38bdf8;"></span>
+          </span>
+          2. Tokyo Night
+        </button>
+
+        <button class="theme-btn" onclick="switchTheme('nordic-aurora')">
+          <span class="swatch-dots">
+            <span class="dot" style="background:#10b981;"></span>
+            <span class="dot" style="background:#34d399;"></span>
+          </span>
+          3. Nordic Aurora
+        </button>
+
+        <button class="theme-btn" onclick="switchTheme('titanium-gold')">
+          <span class="swatch-dots">
+            <span class="dot" style="background:#f59e0b;"></span>
+            <span class="dot" style="background:#fbbf24;"></span>
+          </span>
+          4. Titanium Gold
+        </button>
+
+        <button class="theme-btn" onclick="switchTheme('sunset-horizon')">
+          <span class="swatch-dots">
+            <span class="dot" style="background:#ff6b4a;"></span>
+            <span class="dot" style="background:#e040fb;"></span>
+          </span>
+          5. Sunset Horizon
+        </button>
+      </div>
+
+      <div class="view-modes">
+        <button class="page-tab active" onclick="switchPage('clock')">Main Dashboard</button>
+        <button class="page-tab" onclick="switchPage('weather')">Weather</button>
+        <button class="page-tab" onclick="switchPage('tasks')">Tasks</button>
+        <button class="page-tab" onclick="switchPage('timer')">Timer</button>
+        <button class="page-tab" onclick="switchPage('status')">System Status</button>
+      </div>
+    </div>
+
+    <!-- Realistic Hardware Stage -->
+    <div class="device-stage">
+      <div class="device-chassis">
+        <div class="device-header-plate">
+          <div class="device-brand">NEXORA &bull; 480 &times; 320 TFT</div>
+          <div class="power-led" title="Hardware Power Online"></div>
+        </div>
+
+        <!-- Simulated TFT Screen (480x320) -->
+        <div class="tft-screen theme-cyber-neon" id="mainScreen">
+          <!-- Header Bar (32px) -->
+          <div class="tft-header">
+            <div class="page-title" id="screenTitle">
+              <span>MAIN DASHBOARD</span>
+            </div>
+            <div class="carousel-dots">
+              <span class="c-dot active" id="dot0"></span>
+              <span class="c-dot" id="dot1"></span>
+              <span class="c-dot" id="dot2"></span>
+              <span class="c-dot" id="dot3"></span>
+              <span class="c-dot" id="dot4"></span>
+              <span class="c-dot" id="dot5"></span>
+              <span class="c-dot" id="dot6"></span>
+            </div>
+            <div class="status-indicators">
+              <div class="wifi-bars" title="Wi-Fi Signal Strong">
+                <span class="w-bar"></span>
+                <span class="w-bar"></span>
+                <span class="w-bar"></span>
+              </div>
+              <span id="miniClock">17:58</span>
+            </div>
+          </div>
+
+          <!-- Body Canvas (288px) -->
+          <div class="tft-body" id="screenBody">
+            <!-- Dynamically injected via JavaScript -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Active Palette Breakdown -->
+    <div class="palette-details" id="paletteDetails">
+      <h3 id="paletteName">Cyber Neon — High-Contrast Cyberpunk</h3>
+      <p class="palette-meta" id="paletteDesc">Pitch black obsidian background with ultra-vibrant electric cyan and radiant neon magenta. Unmatched contrast on the ILI9488 TFT panel.</p>
+      
+      <div class="swatches-grid" id="swatchesGrid">
+        <!-- Injected via JS -->
+      </div>
+    </div>
+
+    <!-- Side-by-Side Comparison Gallery -->
+    <h2 class="gallery-title">Side-by-Side Theme Comparison (Main Dashboard)</h2>
+    <div class="gallery-grid">
+      
+      <!-- Card 1 -->
+      <div class="mini-preview-card" onclick="switchTheme('cyber-neon')">
+        <h4><span>1. Cyber Neon</span> <span style="color:#00f5ff;">#00F5FF</span></h4>
+        <div class="mini-scale-box">
+          <div class="mini-scale-inner tft-screen theme-cyber-neon">
+            <div class="tft-header"><div class="page-title">MAIN DASHBOARD</div><div>17:58</div></div>
+            <div class="tft-body">
+              <div class="dashboard-layout">
+                <div class="dashboard-clock-card">
+                  <div class="clock-top-bar"><span>&#128205; KATHMANDU</span><span>24H</span></div>
+                  <div class="clock-center-time"><span class="digital-time">17:58</span><span class="digital-secs">:42</span></div>
+                  <div class="full-date-text">SUNDAY, 13 SEP 2026</div>
+                </div>
+                <div class="dashboard-weather-card">
+                  <div class="weather-card-content">
+                    <div class="weather-left-col">
+                      <div class="weather-temp-huge">24.5&deg;C</div>
+                      <div class="weather-condition-label">Partly Cloudy</div>
+                    </div>
+                    <div class="weather-right-metrics">
+                      <div class="metric-boxes-grid">
+                        <div class="dash-metric-box"><span class="m-lbl">HUM</span><span class="m-val">68%</span></div>
+                        <div class="dash-metric-box"><span class="m-lbl">WIND</span><span class="m-val">3.2</span></div>
+                        <div class="dash-metric-box"><span class="m-lbl">BARO</span><span class="m-val">1012</span></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 2 -->
+      <div class="mini-preview-card" onclick="switchTheme('tokyo-night')">
+        <h4><span>2. Tokyo Night</span> <span style="color:#a78bfa;">#A78BFA</span></h4>
+        <div class="mini-scale-box">
+          <div class="mini-scale-inner tft-screen theme-tokyo-night">
+            <div class="tft-header"><div class="page-title">MAIN DASHBOARD</div><div>17:58</div></div>
+            <div class="tft-body">
+              <div class="dashboard-layout">
+                <div class="dashboard-clock-card">
+                  <div class="clock-top-bar"><span>&#128205; KATHMANDU</span><span>24H</span></div>
+                  <div class="clock-center-time"><span class="digital-time">17:58</span><span class="digital-secs">:42</span></div>
+                  <div class="full-date-text">SUNDAY, 13 SEP 2026</div>
+                </div>
+                <div class="dashboard-weather-card">
+                  <div class="weather-card-content">
+                    <div class="weather-left-col">
+                      <div class="weather-temp-huge">24.5&deg;C</div>
+                      <div class="weather-condition-label">Partly Cloudy</div>
+                    </div>
+                    <div class="weather-right-metrics">
+                      <div class="metric-boxes-grid">
+                        <div class="dash-metric-box"><span class="m-lbl">HUM</span><span class="m-val">68%</span></div>
+                        <div class="dash-metric-box"><span class="m-lbl">WIND</span><span class="m-val">3.2</span></div>
+                        <div class="dash-metric-box"><span class="m-lbl">BARO</span><span class="m-val">1012</span></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 3 -->
+      <div class="mini-preview-card" onclick="switchTheme('nordic-aurora')">
+        <h4><span>3. Nordic Aurora</span> <span style="color:#10b981;">#10B981</span></h4>
+        <div class="mini-scale-box">
+          <div class="mini-scale-inner tft-screen theme-nordic-aurora">
+            <div class="tft-header"><div class="page-title">MAIN DASHBOARD</div><div>17:58</div></div>
+            <div class="tft-body">
+              <div class="dashboard-layout">
+                <div class="dashboard-clock-card">
+                  <div class="clock-top-bar"><span>&#128205; KATHMANDU</span><span>24H</span></div>
+                  <div class="clock-center-time"><span class="digital-time">17:58</span><span class="digital-secs">:42</span></div>
+                  <div class="full-date-text">SUNDAY, 13 SEP 2026</div>
+                </div>
+                <div class="dashboard-weather-card">
+                  <div class="weather-card-content">
+                    <div class="weather-left-col">
+                      <div class="weather-temp-huge">24.5&deg;C</div>
+                      <div class="weather-condition-label">Partly Cloudy</div>
+                    </div>
+                    <div class="weather-right-metrics">
+                      <div class="metric-boxes-grid">
+                        <div class="dash-metric-box"><span class="m-lbl">HUM</span><span class="m-val">68%</span></div>
+                        <div class="dash-metric-box"><span class="m-lbl">WIND</span><span class="m-val">3.2</span></div>
+                        <div class="dash-metric-box"><span class="m-lbl">BARO</span><span class="m-val">1012</span></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 4 -->
+      <div class="mini-preview-card" onclick="switchTheme('titanium-gold')">
+        <h4><span>4. Titanium Gold</span> <span style="color:#f59e0b;">#F59E0B</span></h4>
+        <div class="mini-scale-box">
+          <div class="mini-scale-inner tft-screen theme-titanium-gold">
+            <div class="tft-header"><div class="page-title">MAIN DASHBOARD</div><div>17:58</div></div>
+            <div class="tft-body">
+              <div class="dashboard-layout">
+                <div class="dashboard-clock-card">
+                  <div class="clock-top-bar"><span>&#128205; KATHMANDU</span><span>24H</span></div>
+                  <div class="clock-center-time"><span class="digital-time">17:58</span><span class="digital-secs">:42</span></div>
+                  <div class="full-date-text">SUNDAY, 13 SEP 2026</div>
+                </div>
+                <div class="dashboard-weather-card">
+                  <div class="weather-card-content">
+                    <div class="weather-left-col">
+                      <div class="weather-temp-huge">24.5&deg;C</div>
+                      <div class="weather-condition-label">Partly Cloudy</div>
+                    </div>
+                    <div class="weather-right-metrics">
+                      <div class="metric-boxes-grid">
+                        <div class="dash-metric-box"><span class="m-lbl">HUM</span><span class="m-val">68%</span></div>
+                        <div class="dash-metric-box"><span class="m-lbl">WIND</span><span class="m-val">3.2</span></div>
+                        <div class="dash-metric-box"><span class="m-lbl">BARO</span><span class="m-val">1012</span></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 5 -->
+      <div class="mini-preview-card" onclick="switchTheme('sunset-horizon')">
+        <h4><span>5. Sunset Horizon</span> <span style="color:#ff6b4a;">#FF6B4A</span></h4>
+        <div class="mini-scale-box">
+          <div class="mini-scale-inner tft-screen theme-sunset-horizon">
+            <div class="tft-header"><div class="page-title">MAIN DASHBOARD</div><div>17:58</div></div>
+            <div class="tft-body">
+              <div class="dashboard-layout">
+                <div class="dashboard-clock-card">
+                  <div class="clock-top-bar"><span>&#128205; KATHMANDU</span><span>24H</span></div>
+                  <div class="clock-center-time"><span class="digital-time">17:58</span><span class="digital-secs">:42</span></div>
+                  <div class="full-date-text">SUNDAY, 13 SEP 2026</div>
+                </div>
+                <div class="dashboard-weather-card">
+                  <div class="weather-card-content">
+                    <div class="weather-left-col">
+                      <div class="weather-temp-huge">24.5&deg;C</div>
+                      <div class="weather-condition-label">Partly Cloudy</div>
+                    </div>
+                    <div class="weather-right-metrics">
+                      <div class="metric-boxes-grid">
+                        <div class="dash-metric-box"><span class="m-lbl">HUM</span><span class="m-val">68%</span></div>
+                        <div class="dash-metric-box"><span class="m-lbl">WIND</span><span class="m-val">3.2</span></div>
+                        <div class="dash-metric-box"><span class="m-lbl">BARO</span><span class="m-val">1012</span></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Action Box -->
+    <div class="select-banner">
+      <h3 style="margin-bottom: 8px;">Ready to apply to the Clock?</h3>
+      <p style="color: #94a3b8; font-size: 14px; margin-bottom: 20px;">
+        Tell me which theme number you prefer (e.g. <strong>"I like Theme 1"</strong> or <strong>"Theme 3"</strong>), and I will update the C++ display engine in NEXORA to bring that exact design to life on your 3.5" TFT LCD!
+      </p>
+      <button class="select-btn" onclick="alert('Simply reply in the chat with your preferred theme number (1, 2, 3, 4, or 5)!')">Select Your Favorite Theme in Chat &rarr;</button>
+    </div>
+
+  </div>
+
+  <script>
+    let currentTheme = 'cyber-neon';
+    let currentPage = 'clock';
+
+    const themesData = {
+      'cyber-neon': {
+        name: '1. Cyber Neon — High-Contrast Cyberpunk',
+        desc: 'Deep pitch black (#030712) background paired with laser-sharp electric cyan (#00F5FF) and neon magenta (#FF007F). Maximum readability and ultra-crisp appearance on ILI9488.',
+        swatches: [
+          { name: 'Canvas Black', hex: '#030712', rgb565: '0x0020' },
+          { name: 'Card Surface', hex: '#0F172A', rgb565: '0x08E5' },
+          { name: 'Electric Cyan', hex: '#00F5FF', rgb565: '0x07FF' },
+          { name: 'Neon Magenta', hex: '#FF007F', rgb565: '0xF80F' },
+          { name: 'Primary White', hex: '#FFFFFF', rgb565: '0xFFFF' }
+        ]
+      },
+      'tokyo-night': {
+        name: '2. Tokyo Night — Minimalist Dark Luxury',
+        desc: 'Inspired by Japanese developer aesthetics. Rich obsidian indigo (#0D1117) with soothing pastel lavender (#A78BFA) and ice blue (#38BDF8). Sophisticated and gentle on the eyes.',
+        swatches: [
+          { name: 'Midnight Navy', hex: '#0D1117', rgb565: '0x08A3' },
+          { name: 'Card Slate', hex: '#161B26', rgb565: '0x10E4' },
+          { name: 'Pastel Lavender', hex: '#A78BFA', rgb565: '0xA47F' },
+          { name: 'Ice Blue', hex: '#38BDF8', rgb565: '0x35FA' },
+          { name: 'Frost White', hex: '#F8FAFC', rgb565: '0xFFFF' }
+        ]
+      },
+      'nordic-aurora': {
+        name: '3. Nordic Aurora — Obsidian & Emerald Green',
+        desc: 'Dark Scandinavian forest black (#050C09) with luminous emerald green (#10B981) and crisp mint (#34D399). Gives an organic, calming, high-tech instrument feel.',
+        swatches: [
+          { name: 'Abyssal Green', hex: '#050C09', rgb565: '0x0061' },
+          { name: 'Card Pine', hex: '#0B1913', rgb565: '0x08C2' },
+          { name: 'Aurora Emerald', hex: '#10B981', rgb565: '0x15D0' },
+          { name: 'Mint Accent', hex: '#34D399', rgb565: '0x36B3' },
+          { name: 'Glacier Mist', hex: '#ECFDF5', rgb565: '0xEFBF' }
+        ]
+      },
+      'titanium-gold': {
+        name: '4. Titanium Gold — Space Black & Champagne Gold',
+        desc: 'High-end watch / Leica luxury aesthetic. Deep titanium gray-black (#0C0D10) accented with warm champagne gold (#F59E0B) and amber glow (#FBBF24). Elegant and timeless.',
+        swatches: [
+          { name: 'Space Titanium', hex: '#0C0D10', rgb565: '0x0862' },
+          { name: 'Card Alloy', hex: '#15171E', rgb565: '0x10C3' },
+          { name: 'Champagne Gold', hex: '#F59E0B', rgb565: '0xFCE1' },
+          { name: 'Amber Glow', hex: '#FBBF24', rgb565: '0xFDF0' },
+          { name: 'Ivory Text', hex: '#FEF3C7', rgb565: '0xFFF8' }
+        ]
+      },
+      'sunset-horizon': {
+        name: '5. Sunset Horizon — Deep Violet & Solar Orange',
+        desc: 'A bold, energetic twilight theme. Deep cosmos violet (#0B0614) with fiery solar orange (#FF6B4A) and radiant nebula violet (#E040FB). Dramatic, warm, and highly engaging.',
+        swatches: [
+          { name: 'Cosmic Violet', hex: '#0B0614', rgb565: '0x0822' },
+          { name: 'Twilight Card', hex: '#170D28', rgb565: '0x1065' },
+          { name: 'Solar Orange', hex: '#FF6B4A', rgb565: '0xFB49' },
+          { name: 'Radiant Violet', hex: '#E040FB', rgb565: '0xE21F' },
+          { name: 'Starlight White', hex: '#FFFFFF', rgb565: '0xFFFF' }
+        ]
+      }
+    };
+
+    function switchTheme(themeKey) {
+      currentTheme = themeKey;
+      const screen = document.getElementById('mainScreen');
+      screen.className = 'tft-screen theme-' + themeKey;
+
+      // Update button active state
+      document.querySelectorAll('.theme-btn').forEach(btn => btn.classList.remove('active'));
+      const idx = ['cyber-neon', 'tokyo-night', 'nordic-aurora', 'titanium-gold', 'sunset-horizon'].indexOf(themeKey);
+      if (idx >= 0) {
+        document.querySelectorAll('.theme-btn')[idx].classList.add('active');
+      }
+
+      // Update palette breakdown info
+      const data = themesData[themeKey];
+      document.getElementById('paletteName').innerText = data.name;
+      document.getElementById('paletteDesc').innerText = data.desc;
+
+      const grid = document.getElementById('swatchesGrid');
+      grid.innerHTML = '';
+      data.swatches.forEach(s => {
+        grid.innerHTML += `
+          <div class="swatch-card">
+            <div class="swatch-color-box" style="background: ${s.hex};"></div>
+            <div class="swatch-info">
+              <div class="swatch-name">${s.name}</div>
+              <div class="swatch-hex">${s.hex}</div>
+              <div class="swatch-rgb565">RGB565: ${s.rgb565}</div>
+            </div>
+          </div>
+        `;
+      });
+    }
+
+    function switchPage(pageKey) {
+      currentPage = pageKey;
+      document.querySelectorAll('.page-tab').forEach(tab => tab.classList.remove('active'));
+      event.target.classList.add('active');
+
+      const titleEl = document.getElementById('screenTitle');
+      const bodyEl = document.getElementById('screenBody');
+      const dots = document.querySelectorAll('.c-dot');
+      dots.forEach(d => d.classList.remove('active'));
+
+      if (pageKey === 'clock') {
+        titleEl.innerText = 'MAIN DASHBOARD';
+        dots[0].classList.add('active');
+        bodyEl.innerHTML = `
+          <div class="dashboard-layout">
+            <!-- Upper Section: Digital Clock & Date Hub -->
+            <div class="dashboard-clock-card">
+              <div class="clock-top-bar">
+                <span class="location-tag">&#128205; KATHMANDU, NEPAL</span>
+                <span style="font-size: 10px; opacity: 0.75;">NTP SYNCED &bull; 24H</span>
+              </div>
+              <div class="clock-center-time">
+                <span class="digital-time" id="clockHours">17:58</span>
+                <div class="digital-secs-box">
+                  <span class="digital-secs" id="clockSecs">:42</span>
+                  <span class="digital-mode-tag">SEC</span>
+                </div>
+              </div>
+              <div class="clock-bottom-bar">
+                <div class="full-date-text">SUNDAY, 13 SEPTEMBER 2026</div>
+                <div class="glance-row">
+                  <span>&#9200; Alarm: 07:00 AM</span>
+                  <span>&#128203; 2 Tasks Pending</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Lower Section: Today's Live Weather -->
+            <div class="dashboard-weather-card">
+              <div class="weather-card-header">TODAY'S WEATHER</div>
+              <div class="weather-card-content">
+                <div class="weather-left-col">
+                  <div class="weather-temp-huge">24.5&deg;C</div>
+                  <div class="weather-condition-label">Partly Cloudy</div>
+                  <div class="weather-extra-info">
+                    <div>Feels: 25.1&deg;C &bull; H: 27&deg; L: 18&deg;</div>
+                    <div style="opacity: 0.65;">Station: Kathmandu</div>
+                  </div>
+                </div>
+                <div class="weather-right-metrics">
+                  <div class="metric-boxes-grid">
+                    <div class="dash-metric-box">
+                      <span class="m-lbl">HUMIDITY</span>
+                      <span class="m-val">68%</span>
+                      <span class="m-unit">RH</span>
+                    </div>
+                    <div class="dash-metric-box">
+                      <span class="m-lbl">WIND</span>
+                      <span class="m-val">3.2</span>
+                      <span class="m-unit">m/s</span>
+                    </div>
+                    <div class="dash-metric-box">
+                      <span class="m-lbl">PRESSURE</span>
+                      <span class="m-val">1012</span>
+                      <span class="m-unit">hPa</span>
+                    </div>
+                  </div>
+                  <div class="weather-live-indicator">
+                    <span class="live-dot"></span>
+                    <span style="opacity: 0.85;">[Live] Updated: 2m ago</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      } else if (pageKey === 'weather') {
+        titleEl.innerText = 'LIVE WEATHER';
+        dots[1].classList.add('active');
+        bodyEl.innerHTML = `
+          <div class="weather-layout">
+            <div class="weather-current">
+              <div class="widget-label">KATHMANDU &bull; CURRENT</div>
+              <div class="temp-large">24.5&deg;C</div>
+              <div style="font-size: 14px; font-weight: 600;">Partly Cloudy</div>
+              <div class="widget-sub"><span>Feels like: 25.1&deg;C</span><span>Updated: 2m ago</span></div>
+            </div>
+            <div class="weather-grid-col">
+              <div class="metric-cell"><span class="widget-label">HUMIDITY</span><span class="widget-val">68%</span></div>
+              <div class="metric-cell"><span class="widget-label">PRESSURE</span><span class="widget-val">1012</span></div>
+              <div class="metric-cell"><span class="widget-label">WIND</span><span class="widget-val">3.2 <span style="font-size:12px;">m/s</span></span></div>
+              <div class="metric-cell"><span class="widget-label">AIR QUALITY</span><span class="widget-val" style="color:#10b981;">GOOD</span></div>
+            </div>
+          </div>
+        `;
+      } else if (pageKey === 'tasks') {
+        titleEl.innerText = 'MY TASKS';
+        dots[3].classList.add('active');
+        bodyEl.innerHTML = `
+          <div class="tasks-layout">
+            <div class="task-row">
+              <span>&#9745; Finalize NEXORA Firmware v1.0.0</span>
+              <span class="priority-badge" style="color:#10b981;">HIGH</span>
+            </div>
+            <div class="task-row">
+              <span>&#9744; Test Over-The-Air Update Engine</span>
+              <span class="priority-badge" style="color:#00f5ff;">URGENT</span>
+            </div>
+            <div class="task-row">
+              <span>&#9744; Review Client Design Presentation</span>
+              <span class="priority-badge" style="color:#f59e0b;">NORMAL</span>
+            </div>
+            <div class="task-row">
+              <span>&#9744; Configure MQTT Dashboard Sensors</span>
+              <span class="priority-badge" style="color:#a78bfa;">LOW</span>
+            </div>
+          </div>
+        `;
+      } else if (pageKey === 'timer') {
+        titleEl.innerText = 'COUNTDOWN TIMER';
+        dots[4].classList.add('active');
+        bodyEl.innerHTML = `
+          <div class="timer-layout">
+            <span class="widget-label" style="margin-bottom: 8px;">FOCUS SESSION &bull; POMODORO</span>
+            <div class="timer-digits">18:45</div>
+            <div class="timer-bar-wrap">
+              <div class="timer-bar-fill"></div>
+            </div>
+            <div style="font-size: 13px; font-weight: 600; opacity: 0.85;">Total: 25:00 &bull; Running Smoothly</div>
+          </div>
+        `;
+      } else if (pageKey === 'status') {
+        titleEl.innerText = 'SYSTEM STATUS';
+        dots[6].classList.add('active');
+        bodyEl.innerHTML = `
+          <div class="status-layout">
+            <div class="status-card">
+              <div class="widget-label">DEVICE HARDWARE</div>
+              <div class="info-line"><span>Device ID</span><span style="font-weight:700;">NEXORA-9F4A</span></div>
+              <div class="info-line"><span>Firmware</span><span>v1.0.0 (ESP32-S3)</span></div>
+              <div class="info-line"><span>Free Heap</span><span style="color:#10b981;">248 KB</span></div>
+              <div class="info-line"><span>Uptime</span><span>3,420 seconds</span></div>
+            </div>
+            <div class="status-card">
+              <div class="widget-label">CONNECTIVITY &amp; OTA</div>
+              <div class="info-line"><span>Station Wi-Fi</span><span style="color:#00f5ff;">sakshyam</span></div>
+              <div class="info-line"><span>Station IP</span><span>192.168.1.150</span></div>
+              <div class="info-line"><span>Fallback AP</span><span style="color:#f59e0b;">NEXORA-9F4A-AP</span></div>
+              <div class="info-line"><span>Web OTA Portal</span><span>192.168.4.1/update</span></div>
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    // Initial page and theme load
+    switchPage('clock');
+    switchTheme('cyber-neon');
+
+    // Live Clock Simulation
+    setInterval(() => {
+      const now = new Date();
+      const h = String(now.getHours()).padStart(2, '0');
+      const m = String(now.getMinutes()).padStart(2, '0');
+      const s = String(now.getSeconds()).padStart(2, '0');
+      
+      const clockHours = document.getElementById('clockHours');
+      const clockSecs = document.getElementById('clockSecs');
+      const miniClock = document.getElementById('miniClock');
+      
+      if (clockHours) clockHours.innerText = `${h}:${m}`;
+      if (clockSecs) clockSecs.innerText = `:${s}`;
+      if (miniClock) miniClock.innerText = `${h}:${m}`;
+    }, 1000);
+  </script>
+</body>
+</html>

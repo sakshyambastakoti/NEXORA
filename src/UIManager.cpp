@@ -85,7 +85,7 @@ void UIManager::drawCurrentPage() {
 
     const char* title = "NEXORA";
     switch (_currentPage) {
-        case UIPage::PAGE_CLOCK:         title = "CLOCK & DATE"; break;
+        case UIPage::PAGE_CLOCK:         title = "MAIN DASHBOARD"; break;
         case UIPage::PAGE_WEATHER:       title = "WEATHER"; break;
         case UIPage::PAGE_FORECAST:      title = "3-DAY FORECAST"; break;
         case UIPage::PAGE_TASKS:         title = "MY TASKS"; break;
@@ -119,60 +119,213 @@ void UIManager::drawCurrentPage() {
 }
 
 // ----------------------------------------------------------------------------
-// PAGE 1: CLOCK & DATE
+// PAGE 1: MAIN DASHBOARD (DIGITAL CLOCK, DATE & TODAY'S WEATHER)
 // ----------------------------------------------------------------------------
 void UIManager::drawClockPage(bool fullRedraw) {
     DisplayManager& dm = DisplayManager::instance();
     LGFX_NEXORA& lcd = dm.getDisplay();
     TimeManager& tm = TimeManager::instance();
     WeatherManager& wm = WeatherManager::instance();
+    AlarmManager& am = AlarmManager::instance();
+    TaskManager& tkm = TaskManager::instance();
+
+    int hour = tm.getHour();
+    int min = tm.getMinute();
+    int sec = tm.getSecond();
+    bool isPM = (hour >= 12);
+    int displayHour = hour;
+    if (!g_config.use24Hour) {
+        displayHour = hour % 12;
+        if (displayHour == 0) displayHour = 12;
+    }
+
+    char timeMainBuf[8];
+    snprintf(timeMainBuf, sizeof(timeMainBuf), "%02d:%02d", displayHour, min);
+
+    char secBuf[8];
+    snprintf(secBuf, sizeof(secBuf), ":%02d", sec);
 
     if (fullRedraw) {
         dm.clearContentArea();
 
-        // 1. Accent Banner Line
-        lcd.fillRect(40, 42, 400, 2, Colors::CardBorder);
+        // ====================================================================
+        // CARD 1: MAIN CLOCK & DATE HUB (TOP HALF)
+        // ====================================================================
+        dm.drawCard(12, 38, 456, 132);
 
-        // 2. Full Date & Day
+        // Location tag
+        lcd.setTextDatum(textdatum_t::top_left);
+        lcd.setTextColor(Colors::AccentCyan, Colors::CardBg);
+        lcd.setTextSize(1);
+        lcd.setFont(&fonts::Font0);
+        char locTag[48];
+        snprintf(locTag, sizeof(locTag), " %s", g_config.locationName);
+        lcd.drawString(locTag, 24, 46);
+
+        // Station & NTP status
+        lcd.setTextDatum(textdatum_t::top_right);
+        lcd.setTextColor(Colors::TextMuted, Colors::CardBg);
+        const char* statusTag = tm.isSynced() ? "NTP SYNCED" : "RTC CLOCK";
+        lcd.drawString(statusTag, 456, 46);
+
+        // Full Date String
         String dateStr = tm.getDateString();
         lcd.setTextDatum(textdatum_t::middle_center);
-        lcd.setTextColor(Colors::TextPrimary, Colors::Background);
-        lcd.setTextSize(2);
-        lcd.drawString(dateStr.c_str(), 240, 155);
-
-        // 3. Location & Timezone Card
-        dm.drawCard(40, 185, 190, 105, "LOCATION");
-        lcd.setTextDatum(textdatum_t::middle_center);
         lcd.setTextColor(Colors::TextPrimary, Colors::CardBg);
-        lcd.setTextSize(2);
-        lcd.drawString(g_config.locationName, 135, 230);
-        lcd.setTextColor(Colors::TextMuted, Colors::CardBg);
         lcd.setTextSize(1);
-        lcd.drawString(g_config.timezone, 135, 260);
+        lcd.setFont(&fonts::Font0);
+        lcd.drawString(dateStr.c_str(), 240, 132);
 
-        // 4. Weather Glance Card
-        dm.drawCard(250, 185, 190, 105, "WEATHER BRIEF");
+        // Glance status badges (Active Alarm / Pending Tasks)
+        char alarmGlance[32] = "No Alarms";
+        for (size_t i = 0; i < am.getAlarmCount(); i++) {
+            const NEXORAAlarm* a = am.getAlarm(i);
+            if (a && a->enabled) {
+                snprintf(alarmGlance, sizeof(alarmGlance), "Alarm: %02d:%02d", a->hour, a->minute);
+                break;
+            }
+        }
+
+        size_t pendingTasks = 0;
+        for (size_t i = 0; i < tkm.getTaskCount(); i++) {
+            const NEXORATask* t = tkm.getTask(i);
+            if (t && !t->completed) pendingTasks++;
+        }
+        char taskGlance[32];
+        if (pendingTasks == 0) {
+            snprintf(taskGlance, sizeof(taskGlance), "All Tasks Done");
+        } else {
+            snprintf(taskGlance, sizeof(taskGlance), "%u Tasks Pending", (unsigned)pendingTasks);
+        }
+
+        lcd.setTextDatum(textdatum_t::middle_left);
+        lcd.setTextColor(Colors::TextMuted, Colors::CardBg);
+        lcd.drawString(alarmGlance, 24, 154);
+
+        lcd.setTextDatum(textdatum_t::middle_right);
+        lcd.drawString(taskGlance, 456, 154);
+
+        // ====================================================================
+        // CARD 2: TODAY'S WEATHER DASHBOARD (BOTTOM HALF)
+        // ====================================================================
+        dm.drawCard(12, 176, 456, 136, "TODAY'S WEATHER");
         const WeatherData& w = wm.getData();
-        char tempBuf[32];
+
+        // Temperature (Large in Accent Amber)
+        char tempBuf[16];
         snprintf(tempBuf, sizeof(tempBuf), "%.1f %s", 
                  g_config.useCelsius ? w.temperature : (w.temperature * 1.8f + 32.0f),
                  g_config.useCelsius ? "C" : "F");
-        lcd.setTextDatum(textdatum_t::middle_center);
-        lcd.setTextColor(Colors::AccentAmber, Colors::CardBg);
-        lcd.setTextSize(2);
-        lcd.drawString(tempBuf, 345, 230);
-
-        lcd.setTextColor(Colors::TextMuted, Colors::CardBg);
+        lcd.setFont(&fonts::Font4);
         lcd.setTextSize(1);
-        lcd.drawString(w.condition, 345, 260);
+        lcd.setTextColor(Colors::AccentAmber, Colors::CardBg);
+        lcd.setTextDatum(textdatum_t::top_left);
+        lcd.drawString(tempBuf, 28, 204);
+
+        // Condition text
+        lcd.setFont(&fonts::Font0);
+        lcd.setTextSize(2);
+        lcd.setTextColor(Colors::TextPrimary, Colors::CardBg);
+        lcd.drawString(w.condition, 28, 238);
+
+        // Feels like & Forecast High/Low
+        char feelsBuf[48];
+        snprintf(feelsBuf, sizeof(feelsBuf), "Feels: %.1f%s  |  H: %.0f L: %.0f",
+                 g_config.useCelsius ? w.feelsLike : (w.feelsLike * 1.8f + 32.0f),
+                 g_config.useCelsius ? "C" : "F",
+                 w.forecastCount > 0 ? w.forecast[0].tempMax : 25.0f,
+                 w.forecastCount > 0 ? w.forecast[0].tempMin : 16.0f);
+        lcd.setTextSize(1);
+        lcd.setTextColor(Colors::TextMuted, Colors::CardBg);
+        lcd.drawString(feelsBuf, 28, 268);
+
+        char wtrLocBuf[32];
+        snprintf(wtrLocBuf, sizeof(wtrLocBuf), "Station: %s", strlen(w.location) > 0 ? w.location : g_config.locationName);
+        lcd.drawString(wtrLocBuf, 28, 286);
+
+        // Vertical divider between temperature and metrics
+        lcd.drawFastVLine(205, 196, 104, Colors::CardBorder);
+
+        // Right side: 3 Metric Cards
+        // 1. Humidity
+        lcd.drawRoundRect(216, 196, 74, 72, 4, Colors::CardBorder);
+        lcd.setTextDatum(textdatum_t::middle_center);
+        lcd.setTextColor(Colors::TextMuted, Colors::CardBg);
+        lcd.drawString("HUMIDITY", 253, 208);
+        char humBuf[16];
+        snprintf(humBuf, sizeof(humBuf), "%d%%", w.humidity);
+        lcd.setTextColor(Colors::AccentCyan, Colors::CardBg);
+        lcd.setTextSize(2);
+        lcd.drawString(humBuf, 253, 232);
+        lcd.setTextSize(1);
+        lcd.setTextColor(Colors::TextMuted, Colors::CardBg);
+        lcd.drawString("RH", 253, 256);
+
+        // 2. Wind
+        lcd.drawRoundRect(296, 196, 74, 72, 4, Colors::CardBorder);
+        lcd.setTextColor(Colors::TextMuted, Colors::CardBg);
+        lcd.drawString("WIND", 333, 208);
+        char windBuf[16];
+        snprintf(windBuf, sizeof(windBuf), "%.1f", w.windSpeed);
+        lcd.setTextColor(Colors::AccentCyan, Colors::CardBg);
+        lcd.setTextSize(2);
+        lcd.drawString(windBuf, 333, 232);
+        lcd.setTextSize(1);
+        lcd.setTextColor(Colors::TextMuted, Colors::CardBg);
+        lcd.drawString("m/s", 333, 256);
+
+        // 3. Barometer
+        lcd.drawRoundRect(376, 196, 82, 72, 4, Colors::CardBorder);
+        lcd.setTextColor(Colors::TextMuted, Colors::CardBg);
+        lcd.drawString("BAROMETER", 417, 208);
+        char pressBuf[16];
+        snprintf(pressBuf, sizeof(pressBuf), "%d", w.pressure);
+        lcd.setTextColor(Colors::AccentCyan, Colors::CardBg);
+        lcd.setTextSize(2);
+        lcd.drawString(pressBuf, 417, 232);
+        lcd.setTextSize(1);
+        lcd.setTextColor(Colors::TextMuted, Colors::CardBg);
+        lcd.drawString("hPa", 417, 256);
+
+        // Freshness status
+        lcd.setTextDatum(textdatum_t::middle_left);
+        lcd.setTextColor(w.isCached ? Colors::AccentAmber : Colors::SuccessGreen, Colors::CardBg);
+        String ageText = (w.isCached ? "[Cached] " : "[Live] ") + wm.getAgeString();
+        lcd.drawString(ageText.c_str(), 218, 286);
     }
 
-    // 5. Giant Digital Time (Updated every second with background overwrite)
-    String timeStr = tm.getTimeString(true, g_config.use24Hour);
-    lcd.setTextDatum(textdatum_t::middle_center);
-    lcd.setTextColor(Colors::AccentCyan, Colors::Background);
-    lcd.setTextSize(5);
-    lcd.drawString(timeStr.c_str(), 240, 95);
+    // ========================================================================
+    // DYNAMIC DIGITAL TIME (Updated every second with zero flicker)
+    // ========================================================================
+    // Clean overwrite of time display bounding box
+    lcd.fillRect(145, 64, 195, 54, Colors::CardBg);
+
+    // 1. HH:MM in 7-Segment Digital Clock Font
+    lcd.setFont(&fonts::Font7);
+    lcd.setTextSize(1);
+    lcd.setTextDatum(textdatum_t::top_left);
+    lcd.setTextColor(Colors::AccentCyan, Colors::CardBg);
+    lcd.drawString(timeMainBuf, 154, 66);
+
+    // 2. Seconds counter (:SS) in clean Font4
+    lcd.setFont(&fonts::Font4);
+    lcd.setTextSize(1);
+    lcd.setTextColor(Colors::AccentAmber, Colors::CardBg);
+    lcd.drawString(secBuf, 290, 68);
+
+    // 3. AM/PM or 24H mode indicator below seconds
+    lcd.setFont(&fonts::Font0);
+    lcd.setTextSize(1);
+    lcd.setTextColor(Colors::TextMuted, Colors::CardBg);
+    if (!g_config.use24Hour) {
+        lcd.drawString(isPM ? "PM" : "AM", 292, 98);
+    } else {
+        lcd.drawString("24H", 292, 98);
+    }
+
+    // Restore standard font and size
+    lcd.setFont(&fonts::Font0);
+    lcd.setTextSize(1);
 }
 
 // ----------------------------------------------------------------------------

@@ -79,6 +79,33 @@ void setup() {
     Serial.println(F("[BOOT] NEXORA boot sequence completed successfully."));
 }
 
+static void handleSerialCommands() {
+    while (Serial.available() > 0) {
+        char c = Serial.read();
+        if (c == '\r' || c == '\n') continue;
+        if (c == 'n' || c == 'N') {
+            Serial.println(F("[SERIAL] Switching to NEXT page"));
+            UIManager::instance().nextPage();
+        } else if (c == 'p' || c == 'P') {
+            Serial.println(F("[SERIAL] Switching to PREVIOUS page"));
+            UIManager::instance().previousPage();
+        } else if (c >= '0' && c <= '6') {
+            Serial.printf("[SERIAL] Switching to PAGE %c\n", c);
+            UIManager::instance().setPage(static_cast<UIPage>(c - '0'));
+        } else if (c == 'r' || c == 'R') {
+            Serial.println(F("[SERIAL] Forcing display REDRAW"));
+            UIManager::instance().forceRedraw();
+        } else if (c == '?' || c == 'h' || c == 'H') {
+            Serial.println(F("=== NEXORA SERIAL COMMANDS ==="));
+            Serial.println(F("  n / N: Next display page"));
+            Serial.println(F("  p / P: Previous display page"));
+            Serial.println(F("  0..6 : Jump to page (0=Dashboard, 1=Weather, 2=Forecast, 3=Tasks, 4=Timer, 5=Alarm, 6=Status)"));
+            Serial.println(F("  r / R: Force full redraw"));
+            Serial.println(F("=============================="));
+        }
+    }
+}
+
 void loop() {
     // High-Priority Firmware Update Mode: Dedicate all CPU & memory resources to OTA
     if (DeviceManager::instance().getState() == DeviceState::OTA_UPDATE) {
@@ -86,6 +113,9 @@ void loop() {
         delay(1); // Yield to ESP32 network stack and feed FreeRTOS watchdog
         return;
     }
+
+    // Check for interactive serial input
+    handleSerialCommands();
 
     // Cooperative Non-Blocking Scheduler
     WiFiManager::instance().update();
