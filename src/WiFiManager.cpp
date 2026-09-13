@@ -35,6 +35,11 @@ void WiFiManager::begin() {
 }
 
 void WiFiManager::update() {
+    // If an OTA update is actively in progress, freeze Wi-Fi state to prevent radio resets or channel hops
+    if (DeviceManager::instance().getState() == DeviceState::OTA_UPDATE) {
+        return;
+    }
+
     bool connected = (WiFi.status() == WL_CONNECTED);
 
     if (connected && !_wasConnected) {

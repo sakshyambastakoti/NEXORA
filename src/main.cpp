@@ -80,6 +80,13 @@ void setup() {
 }
 
 void loop() {
+    // High-Priority Firmware Update Mode: Dedicate all CPU & memory resources to OTA
+    if (DeviceManager::instance().getState() == DeviceState::OTA_UPDATE) {
+        OTAManager::instance().update();
+        delay(1); // Yield to ESP32 network stack and feed FreeRTOS watchdog
+        return;
+    }
+
     // Cooperative Non-Blocking Scheduler
     WiFiManager::instance().update();
     MQTTManager::instance().update();

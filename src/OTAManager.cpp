@@ -23,20 +23,24 @@ void OTAManager::begin() {
 
     ArduinoOTA.onStart([this]() {
         _isUpdating = true;
+        _lastProgressPct = -1;
         DeviceManager::instance().setState(DeviceState::OTA_UPDATE);
         Serial.println(F("[OTA] ArduinoOTA update process started."));
-        DisplayManager::instance().showBootScreen("FIRMWARE UPDATE IN PROGRESS", 0);
+        DisplayManager::instance().showOTAScreen("STARTING FIRMWARE UPDATE...", 0, true);
     });
 
     ArduinoOTA.onEnd([]() {
         Serial.println(F("\n[OTA] Firmware update completed successfully! Rebooting..."));
-        DisplayManager::instance().showBootScreen("UPDATE COMPLETE! REBOOTING...", 100);
+        DisplayManager::instance().showOTAScreen("VERIFYING & REBOOTING...", 100, false);
     });
 
-    ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) {
-        unsigned int pct = (total > 0) ? (progress / (total / 100)) : 0;
-        DisplayManager::instance().showBootScreen("RECEIVING FIRMWARE DATA...", pct);
-        Serial.printf("[OTA] Progress: %u%%\r", pct);
+    ArduinoOTA.onProgress([this](unsigned int progress, unsigned int total) {
+        int pct = (total > 0) ? (int)((progress * 100) / total) : 0;
+        if (pct != _lastProgressPct) {
+            _lastProgressPct = pct;
+            DisplayManager::instance().showOTAScreen("RECEIVING FIRMWARE DATA...", pct, false);
+            Serial.printf("[OTA] Progress: %d%%\r", pct);
+        }
     });
 
     ArduinoOTA.onError([this](ota_error_t error) {
@@ -48,7 +52,7 @@ void OTAManager::begin() {
         else if (error == OTA_CONNECT_ERROR) Serial.println(F("Connect Failed"));
         else if (error == OTA_RECEIVE_ERROR) Serial.println(F("Receive Failed"));
         else if (error == OTA_END_ERROR) Serial.println(F("End Failed"));
-        DisplayManager::instance().showBootScreen("OTA UPDATE FAILED!", 0);
+        DisplayManager::instance().showOTAScreen("OTA UPDATE FAILED!", 0, false);
     });
 
     ArduinoOTA.begin();
@@ -273,46 +277,67 @@ void OTAManager::handleUpdateUpload() {
 
     if (upload.status == UPLOAD_FILE_START) {
         _isUpdating = true;
+        _lastProgressPct = -1;
         _uploadTotalSize = 0;
         if (_server.hasHeader("Content-Length")) {
             _uploadTotalSize = _server.header("Content-Length").toInt();
         }
         DeviceManager::instance().setState(DeviceState::OTA_UPDATE);
-        Serial.printf("[WEB-OTA] Starting update: %s (Total: %u bytes)\n", upload.filename.c_str(), (unsigned int)_uploadTotalSize);
-        DisplayManager::instance().showBootScreen("FIRMWARE UPDATE IN PROGRESS", 0);
+        Serial.printf("[WEB-OTA] Starting update: %s (Total size: %u bytes)\n", upload.filename.c_str(), (unsigned int)_uploadTotalSize);
+        DisplayManager::instance().showOTAScreen("STARTING FIRMWARE FLASH...", 0, true);
 
-        if (!Update.begin(UPDATE_SIZE_UNKNOWN)) {
+        size_t maxSketchSpace = (ESP.getFreeSketchSpace() - 0x1000) & 0xFFFFF000;
+        if (!Update.begin(maxSketchSpace, U_FLASH)) {
             Update.printError(Serial);
+            DisplayManager::instance().showOTAScreen("FLASH INIT FAILED!", 0, false);
+            _isUpdating = false;
+            DeviceManager::instance().setState(DeviceState::ONLINE);
         }
     } else if (upload.status == UPLOAD_FILE_WRITE) {
+        if (!_isUpdating) return;
+
         if (Update.write(upload.buf, upload.currentSize) != upload.currentSize) {
             Update.printError(Serial);
+            DisplayManager::instance().showOTAScreen("FLASH WRITE ERROR!", 0, false);
+            _isUpdating = false;
+            DeviceManager::instance().setState(DeviceState::ONLINE);
+            return;
         }
-        unsigned int pct = (_uploadTotalSize > 0) ? (unsigned int)((upload.totalSize * 100) / _uploadTotalSize) : 50;
-        if (pct > 100) pct = 100;
-        DisplayManager::instance().showBootScreen("RECEIVING FIRMWARE DATA...", pct);
-        Serial.printf("[WEB-OTA] Progress: %u%%\r", pct);
+
+        int pct = 50;
+        if (_uploadTotalSize > 0) {
+            pct = (int)((upload.totalSize * 100) / _uploadTotalSize);
+            if (pct > 99) pct = 99; // 100% reserved for end
+        }
+
+        if (pct != _lastProgressPct) {
+            _lastProgressPct = pct;
+            DisplayManager::instance().showOTAScreen("FLASHING FIRMWARE DATA...", pct, false);
+            Serial.printf("[WEB-OTA] Progress: %d%%\r", pct);
+        }
     } else if (upload.status == UPLOAD_FILE_END) {
+        if (!_isUpdating) return;
+
         if (Update.end(true)) {
-            Serial.printf("\n[WEB-OTA] Success: %u bytes written! Rebooting...\n", (unsigned int)upload.totalSize);
-            DisplayManager::instance().showBootScreen("UPDATE COMPLETE! REBOOTING...", 100);
+            Serial.printf("\n[WEB-OTA] Flash successful: %u bytes written! Rebooting...\n", (unsigned int)upload.totalSize);
+            DisplayManager::instance().showOTAScreen("VERIFYING & REBOOTING...", 100, false);
         } else {
             Update.printError(Serial);
-            DisplayManager::instance().showBootScreen("OTA UPDATE FAILED!", 0);
+            DisplayManager::instance().showOTAScreen("OTA VALIDATION FAILED!", 0, false);
             _isUpdating = false;
             DeviceManager::instance().setState(DeviceState::ONLINE);
         }
     } else if (upload.status == UPLOAD_FILE_ABORTED) {
         Update.end();
-        Serial.println(F("\n[WEB-OTA] Update aborted."));
-        DisplayManager::instance().showBootScreen("OTA UPDATE ABORTED!", 0);
+        Serial.println(F("\n[WEB-OTA] Update aborted by client."));
+        DisplayManager::instance().showOTAScreen("UPDATE ABORTED!", 0, false);
         _isUpdating = false;
         DeviceManager::instance().setState(DeviceState::ONLINE);
     }
 }
 
 void OTAManager::handleUpdateDone() {
-    bool ok = !Update.hasError();
+    bool ok = !Update.hasError() && _isUpdating;
     String html;
     html.reserve(1024);
     html += F("<!DOCTYPE html><html><head><meta charset='UTF-8'><meta name='viewport' content='width=device-width,initial-scale=1.0'>");
@@ -323,7 +348,7 @@ void OTAManager::handleUpdateDone() {
     if (ok) {
         html += F("<h2>Update Complete!</h2><p>Firmware successfully flashed. NEXORA is rebooting now...</p>");
     } else {
-        html += F("<h2 style='color:#f85149;'>Update Failed</h2><p>The firmware could not be verified or flashed. Please try again.</p><p><a href='/update' style='color:#38bdf8;'>Try Again &rarr;</a></p>");
+        html += F("<h2 style='color:#f85149;'>Update Failed</h2><p>The firmware could not be verified or written. Please check the file and try again.</p><p><a href='/update' style='color:#38bdf8;'>Try Again &rarr;</a></p>");
     }
 
     html += F("</div></body></html>");
@@ -331,7 +356,7 @@ void OTAManager::handleUpdateDone() {
     _server.send(ok ? 200 : 500, "text/html", html);
 
     if (ok) {
-        delay(1000);
+        delay(1500);
         ESP.restart();
     }
 }

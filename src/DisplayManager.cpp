@@ -74,6 +74,65 @@ void DisplayManager::showBootScreen(const char* statusMsg, int progressPercent) 
     _lcd.drawString("Firmware v1.0.0 | Arduino Nano ESP32", 240, 310);
 }
 
+void DisplayManager::showOTAScreen(const char* statusMsg, int progressPercent, bool firstDraw) {
+    if (!_initialized) begin();
+
+    if (progressPercent < 0) progressPercent = 0;
+    if (progressPercent > 100) progressPercent = 100;
+
+    int barX = 60;
+    int barY = 170;
+    int barW = 360;
+    int barH = 20;
+
+    if (firstDraw) {
+        _lcd.fillScreen(Colors::Background);
+        _lcd.fillRect(0, 0, 480, 4, Colors::AccentCyan);
+
+        _lcd.setTextDatum(textdatum_t::middle_center);
+        _lcd.setTextColor(Colors::AccentCyan, Colors::Background);
+        _lcd.setTextSize(3);
+        _lcd.drawString("FIRMWARE UPDATE", 240, 70);
+
+        _lcd.setTextColor(Colors::AlertRed, Colors::Background);
+        _lcd.setTextSize(1);
+        _lcd.drawString("CRITICAL: DO NOT DISCONNECT POWER OR NETWORK", 240, 110);
+
+        // Progress bar container
+        _lcd.drawRoundRect(barX - 3, barY - 3, barW + 6, barH + 6, 6, Colors::CardBorder);
+        _lcd.fillRoundRect(barX, barY, barW, barH, 3, Colors::CardBg);
+
+        // Footer info
+        _lcd.setTextColor(Colors::TextMuted, Colors::Background);
+        _lcd.setTextDatum(textdatum_t::bottom_center);
+        _lcd.drawString("NEXORA Over-The-Air Flashing Engine", 240, 310);
+    }
+
+    // Dynamic Progress Bar fill (only updates changed pixels)
+    int fillW = (barW * progressPercent) / 100;
+    if (fillW > 0) {
+        _lcd.fillRect(barX, barY, fillW, barH, Colors::AccentCyan);
+    }
+    if (fillW < barW) {
+        _lcd.fillRect(barX + fillW, barY, barW - fillW, barH, Colors::CardBg);
+    }
+
+    // Status message
+    _lcd.setTextDatum(textdatum_t::middle_center);
+    _lcd.setTextColor(Colors::TextPrimary, Colors::Background);
+    _lcd.setTextSize(1);
+    _lcd.fillRect(40, 210, 400, 20, Colors::Background);
+    _lcd.drawString(statusMsg, 240, 220);
+
+    // Percentage
+    char pctStr[16];
+    snprintf(pctStr, sizeof(pctStr), "%d%%", progressPercent);
+    _lcd.fillRect(180, 240, 120, 26, Colors::Background);
+    _lcd.setTextColor(Colors::AccentAmber, Colors::Background);
+    _lcd.setTextSize(2);
+    _lcd.drawString(pctStr, 240, 252);
+}
+
 void DisplayManager::renderHeader(const char* pageTitle, UIPage currentPage, int8_t rssi, bool mqttOk, const char* timeStr) {
     // Header background bar
     _lcd.fillRect(0, 0, 480, 32, Colors::CardBg);

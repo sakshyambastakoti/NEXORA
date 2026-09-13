@@ -31,5 +31,6 @@ private:
     bool _initialized = false;
     bool _isUpdating = false;
     size_t _uploadTotalSize = 0;
+    int _lastProgressPct = -1;
 };
 

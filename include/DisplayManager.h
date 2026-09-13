@@ -80,6 +80,7 @@ public:
 
     // Screen helpers
     void showBootScreen(const char* statusMsg, int progressPercent);
+    void showOTAScreen(const char* statusMsg, int progressPercent, bool firstDraw = false);
     void renderHeader(const char* pageTitle, UIPage currentPage, int8_t rssi, bool mqttOk, const char* timeStr);
     void drawCard(int x, int y, int w, int h, const char* label = nullptr);
     void clearContentArea();
