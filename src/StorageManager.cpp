@@ -45,6 +45,10 @@ bool StorageManager::loadConfig(NEXORAConfig& config) {
 
     _prefs.getString("wifiSsid", config.wifiSsid, sizeof(config.wifiSsid));
     _prefs.getString("wifiPass", config.wifiPassword, sizeof(config.wifiPassword));
+    if (strlen(config.wifiSsid) == 0 || strcmp(config.wifiSsid, "NEXORA_Guest") == 0) {
+        strncpy(config.wifiSsid, DEFAULT_WIFI_SSID, sizeof(config.wifiSsid));
+        strncpy(config.wifiPassword, DEFAULT_WIFI_PASSWORD, sizeof(config.wifiPassword));
+    }
     _prefs.getString("mqttBroker", config.mqttBroker, sizeof(config.mqttBroker));
     config.mqttPort = _prefs.getUShort("mqttPort", DEFAULT_MQTT_PORT);
     _prefs.getString("mqttUser", config.mqttUser, sizeof(config.mqttUser));

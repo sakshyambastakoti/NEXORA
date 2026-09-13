@@ -68,17 +68,29 @@ pio device monitor -b 115200
 
 ---
 
-## 4. OTA (Over-The-Air) Flashing
+## 4. OTA (Over-The-Air) Updates & Web Portal
 
-Once NEXORA is connected to Wi-Fi, it advertises the ArduinoOTA service with:
-- **Hostname**: `NEXORA-{MAC_ID}` (e.g. `NEXORA-A1B2`)
+NEXORA supports firmware updates and device configuration over **both** your local Wi-Fi and its built-in **Fallback SoftAP**.
+
+### Option A: Web Browser OTA & Portal (Easiest)
+1. If connected to Station Wi-Fi (`sakshyam`), open your browser to `http://<STATION_IP>/`.
+2. If in Fallback AP mode, connect your phone or laptop to Wi-Fi SSID **`NEXORA-{DEVICE_ID}-AP`** (Password: `nexora1234`) and browse to:
+   - **System Dashboard & Wi-Fi Config**: `http://192.168.4.1/`
+   - **Direct Web OTA Upload**: `http://192.168.4.1/update`
+3. Click "Choose File", select `.pio/build/nano_esp32/firmware.bin`, and click **Flash Firmware**.
+4. The clock display will show a live progress bar and automatically reboot when complete.
+
+### Option B: PlatformIO ArduinoOTA (Port 3232)
+NEXORA advertises the ArduinoOTA service:
+- **Hostname**: `NEXORA-{DEVICE_ID}` (e.g. `NEXORA-A1B2`)
 - **Port**: `3232` (Default ESP32 OTA)
-- **Password**: Configured in `include/secrets.h` (`DEFAULT_OTA_PASSWORD`)
+- **Password**: Configured in `include/secrets.h` (`DEFAULT_OTA_PASSWORD`, default: `nexora_admin_ota`)
 
-To flash over the network:
+To flash over the network via PlatformIO:
 ```bash
-pio run -t upload --upload-port <DEVICE_IP> --upload-flags "--auth=nexora_admin_ota"
+pio run -t upload --upload-port <DEVICE_IP_OR_192.168.4.1> --upload-flags "--auth=nexora_admin_ota"
 ```
+
 
 ---
 

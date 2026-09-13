@@ -5,6 +5,7 @@
 #include "TimerManager.h"
 #include "AlarmManager.h"
 #include "DeviceManager.h"
+#include "WiFiManager.h"
 #include <WiFi.h>
 
 extern NEXORAConfig g_config;
@@ -50,6 +51,11 @@ void UIManager::forceRedraw() {
 }
 
 void UIManager::update() {
+    // Guard against drawing while firmware update is in progress
+    if (DeviceManager::instance().getState() == DeviceState::OTA_UPDATE) {
+        return;
+    }
+
     // 1. Auto-rotation handling (only if explicitly enabled and interval >= 5s)
     if (g_config.autoRotate && g_config.pageIntervalMs >= 5000) {
         if (millis() - _lastPageSwitchMs >= g_config.pageIntervalMs) {
@@ -72,7 +78,8 @@ void UIManager::drawCurrentPage() {
     LGFX_NEXORA& lcd = dm.getDisplay();
 
     // WiFi and status info
-    int8_t rssi = WiFi.status() == WL_CONNECTED ? WiFi.RSSI() : -100;
+    WiFiManager& wifi = WiFiManager::instance();
+    int8_t rssi = wifi.isConnected() ? wifi.getRSSI() : (wifi.isAPActive() ? -65 : -100);
     bool mqttOk = (DeviceManager::instance().getState() == DeviceState::ONLINE);
     String timeMini = TimeManager::instance().getTimeString(false, g_config.use24Hour);
 
@@ -471,32 +478,45 @@ void UIManager::drawDeviceStatusPage(bool fullRedraw) {
         // Right Card: Connectivity
         dm.drawCard(250, 50, rightW, 240, "CONNECTIVITY");
 
-        y = 80;
+        WiFiManager& wifiMgr = WiFiManager::instance();
+        y = 74;
         lcd.setTextColor(Colors::TextMuted, Colors::CardBg);
-        lcd.drawString("Wi-Fi Network:", 265, y);
+        lcd.drawString("Station Wi-Fi:", 265, y);
         lcd.setTextColor(Colors::AccentCyan, Colors::CardBg);
-        lcd.drawString(WiFi.status() == WL_CONNECTED ? WiFi.SSID().c_str() : "Disconnected", 265, y + 14);
+        lcd.drawString(wifiMgr.isConnected() ? wifiMgr.getSSID().c_str() : "Connecting/Offline", 265, y + 13);
 
-        y += 38;
+        y += 33;
         lcd.setTextColor(Colors::TextMuted, Colors::CardBg);
-        lcd.drawString("IP Address:", 265, y);
+        lcd.drawString("Station IP:", 265, y);
         lcd.setTextColor(Colors::TextPrimary, Colors::CardBg);
-        lcd.drawString(WiFi.status() == WL_CONNECTED ? WiFi.localIP().toString().c_str() : "None", 265, y + 14);
+        lcd.drawString(wifiMgr.isConnected() ? wifiMgr.getIP().c_str() : "None", 265, y + 13);
 
-        y += 38;
+        y += 33;
         lcd.setTextColor(Colors::TextMuted, Colors::CardBg);
-        lcd.drawString("Wi-Fi RSSI:", 265, y);
-        char rssiBuf[24];
-        snprintf(rssiBuf, sizeof(rssiBuf), "%d dBm", WiFi.RSSI());
-        lcd.setTextColor(Colors::TextPrimary, Colors::CardBg);
-        lcd.drawString(WiFi.status() == WL_CONNECTED ? rssiBuf : "N/A", 265, y + 14);
+        lcd.drawString("Fallback SoftAP:", 265, y);
+        lcd.setTextColor(wifiMgr.isAPActive() ? Colors::SuccessGreen : Colors::TextMuted, Colors::CardBg);
+        lcd.drawString(wifiMgr.isAPActive() ? wifiMgr.getAPSSID().c_str() : "Inactive", 265, y + 13);
 
-        y += 38;
+        y += 33;
         lcd.setTextColor(Colors::TextMuted, Colors::CardBg);
-        lcd.drawString("MQTT Broker:", 265, y);
+        lcd.drawString("AP IP / Web OTA:", 265, y);
+        lcd.setTextColor(wifiMgr.isAPActive() ? Colors::AccentAmber : Colors::TextMuted, Colors::CardBg);
+        lcd.drawString(wifiMgr.isAPActive() ? "192.168.4.1/update" : "Disabled", 265, y + 13);
+
+        y += 33;
+        lcd.setTextColor(Colors::TextMuted, Colors::CardBg);
+        lcd.drawString("Wi-Fi RSSI / MQTT:", 265, y);
+        char netBuf[32];
         bool online = (dev.getState() == DeviceState::ONLINE);
-        lcd.setTextColor(online ? Colors::SuccessGreen : Colors::AlertRed, Colors::CardBg);
-        lcd.drawString(online ? "Connected" : "Disconnected", 265, y + 14);
+        if (wifiMgr.isConnected()) {
+            snprintf(netBuf, sizeof(netBuf), "%d dBm | %s", wifiMgr.getRSSI(), online ? "MQTT OK" : "No MQTT");
+        } else if (wifiMgr.isAPActive()) {
+            snprintf(netBuf, sizeof(netBuf), "AP Mode Active");
+        } else {
+            snprintf(netBuf, sizeof(netBuf), "Offline");
+        }
+        lcd.setTextColor(online ? Colors::SuccessGreen : (wifiMgr.isAPActive() ? Colors::AccentAmber : Colors::AlertRed), Colors::CardBg);
+        lcd.drawString(netBuf, 265, y + 13);
     }
 
     // Dynamic metrics on Left Card (Updated every second with background overwrite)
