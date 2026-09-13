@@ -37,8 +37,9 @@ bool StorageManager::loadConfig(NEXORAConfig& config) {
     config.longitude = _prefs.getFloat("longitude", 85.3240f);
     config.use24Hour = _prefs.getBool("use24Hour", true);
     config.useCelsius = _prefs.getBool("useCelsius", true);
-    config.autoRotate = _prefs.getBool("autoRotate", true);
-    config.pageIntervalMs = _prefs.getUInt("pageInterval", 8000);
+    config.autoRotate = _prefs.getBool("autoRotate", false);
+    config.pageIntervalMs = _prefs.getUInt("pageInterval", 15000);
+    if (config.pageIntervalMs < 5000) config.pageIntervalMs = 15000;
     config.weatherIntervalMs = _prefs.getUInt("wtrInterval", 600000);
     config.statusIntervalMs = _prefs.getUInt("statInterval", 30000);
 

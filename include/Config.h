@@ -74,8 +74,8 @@ struct NEXORAConfig {
         longitude = 85.3240f;
         use24Hour = true;
         useCelsius = true;
-        autoRotate = true;
-        pageIntervalMs = 8000;
+        autoRotate = false;
+        pageIntervalMs = 15000;
         weatherIntervalMs = 600000;
         statusIntervalMs = 30000;
 

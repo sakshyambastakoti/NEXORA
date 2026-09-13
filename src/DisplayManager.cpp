@@ -129,7 +129,7 @@ void DisplayManager::drawCard(int x, int y, int w, int h, const char* label) {
     _lcd.drawRoundRect(x, y, w, h, 6, Colors::CardBorder);
     if (label != nullptr) {
         _lcd.setTextDatum(textdatum_t::top_left);
-        _lcd.setTextColor(Colors::TextMuted, Colors::CardBg);
+        _lcd.setTextColor(Colors::AccentCyan, Colors::CardBg);
         _lcd.setTextSize(1);
         _lcd.drawString(label, x + 10, y + 8);
     }

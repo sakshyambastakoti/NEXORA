@@ -18,7 +18,7 @@ public:
         {
             auto cfg = _bus_instance.config();
             cfg.port = 0;
-            cfg.freq_write = 16000000; // 16MHz parallel write strobe
+            cfg.freq_write = 10000000; // 10MHz stable parallel write strobe for ILI9488
             cfg.pin_wr = Hardware::LCD_WR;  // GPIO 2
             cfg.pin_rd = Hardware::LCD_RD;  // GPIO 1
             cfg.pin_rs = Hardware::LCD_RS;  // GPIO 3
@@ -56,17 +56,17 @@ public:
     }
 };
 
-// Modern Color Palette (RGB565)
+// High-Contrast Modern Color Palette (RGB565)
 namespace Colors {
-    constexpr uint16_t Background    = 0x0842; // Deep obsidian navy #0a0d14
-    constexpr uint16_t CardBg        = 0x18E3; // Surface dark card #141a24
-    constexpr uint16_t CardBorder    = 0x2965; // Card border #242f42
-    constexpr uint16_t AccentCyan    = 0x067F; // Vibrant neon cyan #00cfff
-    constexpr uint16_t AccentAmber   = 0xFD00; // Warm gold / amber #ffa700
-    constexpr uint16_t TextPrimary   = 0xFFFF; // Crisp white #ffffff
-    constexpr uint16_t TextMuted     = 0x8C71; // Slate gray #8a94a6
-    constexpr uint16_t SuccessGreen  = 0x0745; // Emerald green #00e676
-    constexpr uint16_t AlertRed      = 0xF9C7; // Vibrant coral red #ff3b30
+    constexpr uint16_t Background    = 0x0000; // Pitch black for high contrast
+    constexpr uint16_t CardBg        = 0x10A2; // Dark slate card #101418
+    constexpr uint16_t CardBorder    = 0x03EF; // Crisp cyan border #007D7B
+    constexpr uint16_t AccentCyan    = 0x07FF; // Ultra-vibrant neon cyan #00FFFF
+    constexpr uint16_t AccentAmber   = 0xFDE0; // Warm bright gold #FFA800
+    constexpr uint16_t TextPrimary   = 0xFFFF; // Crisp white #FFFFFF
+    constexpr uint16_t TextMuted     = 0xCE79; // Silver gray #CCCCCC
+    constexpr uint16_t SuccessGreen  = 0x07E0; // Vibrant emerald green #00FF00
+    constexpr uint16_t AlertRed      = 0xF800; // Vibrant red #FF0000
 }
 
 class DisplayManager {

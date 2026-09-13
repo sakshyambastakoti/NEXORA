@@ -25,13 +25,13 @@ private:
     UIManager& operator=(const UIManager&) = delete;
 
     void drawCurrentPage();
-    void drawClockPage();
-    void drawWeatherPage();
-    void drawForecastPage();
-    void drawTasksPage();
-    void drawTimerPage();
-    void drawAlarmPage();
-    void drawDeviceStatusPage();
+    void drawClockPage(bool fullRedraw);
+    void drawWeatherPage(bool fullRedraw);
+    void drawForecastPage(bool fullRedraw);
+    void drawTasksPage(bool fullRedraw);
+    void drawTimerPage(bool fullRedraw);
+    void drawAlarmPage(bool fullRedraw);
+    void drawDeviceStatusPage(bool fullRedraw);
 
     UIPage _currentPage = UIPage::PAGE_CLOCK;
     uint32_t _lastPageSwitchMs = 0;

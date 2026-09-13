@@ -50,22 +50,24 @@ void UIManager::forceRedraw() {
 }
 
 void UIManager::update() {
-    // 1. Auto-rotation handling
-    if (g_config.autoRotate && g_config.pageIntervalMs > 0) {
+    // 1. Auto-rotation handling (only if explicitly enabled and interval >= 5s)
+    if (g_config.autoRotate && g_config.pageIntervalMs >= 5000) {
         if (millis() - _lastPageSwitchMs >= g_config.pageIntervalMs) {
             nextPage();
         }
     }
 
-    // 2. Per-second refresh for clock and timer
+    // 2. Per-second refresh for clock, timer, and system stats
     if (millis() - _lastSecondUpdateMs >= 1000 || _needsFullRedraw) {
         _lastSecondUpdateMs = millis();
         drawCurrentPage();
-        _needsFullRedraw = false;
     }
 }
 
 void UIManager::drawCurrentPage() {
+    bool fullRedraw = _needsFullRedraw;
+    _needsFullRedraw = false;
+
     DisplayManager& dm = DisplayManager::instance();
     LGFX_NEXORA& lcd = dm.getDisplay();
 
@@ -86,18 +88,25 @@ void UIManager::drawCurrentPage() {
         default:                         title = "NEXORA"; break;
     }
 
-    // Render universal header
-    dm.renderHeader(title, _currentPage, rssi, mqttOk, timeMini.c_str());
+    if (fullRedraw) {
+        dm.renderHeader(title, _currentPage, rssi, mqttOk, timeMini.c_str());
+    } else {
+        // Mini clock update on header (clean overwrite)
+        lcd.setTextDatum(textdatum_t::middle_right);
+        lcd.setTextColor(Colors::TextPrimary, Colors::CardBg);
+        lcd.setTextSize(1);
+        lcd.drawString(timeMini.c_str(), 464, 16);
+    }
 
     // Render individual page content
     switch (_currentPage) {
-        case UIPage::PAGE_CLOCK:         drawClockPage(); break;
-        case UIPage::PAGE_WEATHER:       drawWeatherPage(); break;
-        case UIPage::PAGE_FORECAST:      drawForecastPage(); break;
-        case UIPage::PAGE_TASKS:         drawTasksPage(); break;
-        case UIPage::PAGE_TIMER:         drawTimerPage(); break;
-        case UIPage::PAGE_ALARM:         drawAlarmPage(); break;
-        case UIPage::PAGE_DEVICE_STATUS: drawDeviceStatusPage(); break;
+        case UIPage::PAGE_CLOCK:         drawClockPage(fullRedraw); break;
+        case UIPage::PAGE_WEATHER:       drawWeatherPage(fullRedraw); break;
+        case UIPage::PAGE_FORECAST:      drawForecastPage(fullRedraw); break;
+        case UIPage::PAGE_TASKS:         drawTasksPage(fullRedraw); break;
+        case UIPage::PAGE_TIMER:         drawTimerPage(fullRedraw); break;
+        case UIPage::PAGE_ALARM:         drawAlarmPage(fullRedraw); break;
+        case UIPage::PAGE_DEVICE_STATUS: drawDeviceStatusPage(fullRedraw); break;
         default: break;
     }
 }
@@ -105,58 +114,66 @@ void UIManager::drawCurrentPage() {
 // ----------------------------------------------------------------------------
 // PAGE 1: CLOCK & DATE
 // ----------------------------------------------------------------------------
-void UIManager::drawClockPage() {
+void UIManager::drawClockPage(bool fullRedraw) {
     DisplayManager& dm = DisplayManager::instance();
     LGFX_NEXORA& lcd = dm.getDisplay();
-    dm.clearContentArea();
-
     TimeManager& tm = TimeManager::instance();
     WeatherManager& wm = WeatherManager::instance();
 
-    // 1. Giant Digital Time
+    if (fullRedraw) {
+        dm.clearContentArea();
+
+        // 1. Accent Banner Line
+        lcd.fillRect(40, 42, 400, 2, Colors::CardBorder);
+
+        // 2. Full Date & Day
+        String dateStr = tm.getDateString();
+        lcd.setTextDatum(textdatum_t::middle_center);
+        lcd.setTextColor(Colors::TextPrimary, Colors::Background);
+        lcd.setTextSize(2);
+        lcd.drawString(dateStr.c_str(), 240, 155);
+
+        // 3. Location & Timezone Card
+        dm.drawCard(40, 185, 190, 105, "LOCATION");
+        lcd.setTextDatum(textdatum_t::middle_center);
+        lcd.setTextColor(Colors::TextPrimary, Colors::CardBg);
+        lcd.setTextSize(2);
+        lcd.drawString(g_config.locationName, 135, 230);
+        lcd.setTextColor(Colors::TextMuted, Colors::CardBg);
+        lcd.setTextSize(1);
+        lcd.drawString(g_config.timezone, 135, 260);
+
+        // 4. Weather Glance Card
+        dm.drawCard(250, 185, 190, 105, "WEATHER BRIEF");
+        const WeatherData& w = wm.getData();
+        char tempBuf[32];
+        snprintf(tempBuf, sizeof(tempBuf), "%.1f %s", 
+                 g_config.useCelsius ? w.temperature : (w.temperature * 1.8f + 32.0f),
+                 g_config.useCelsius ? "C" : "F");
+        lcd.setTextDatum(textdatum_t::middle_center);
+        lcd.setTextColor(Colors::AccentAmber, Colors::CardBg);
+        lcd.setTextSize(2);
+        lcd.drawString(tempBuf, 345, 230);
+
+        lcd.setTextColor(Colors::TextMuted, Colors::CardBg);
+        lcd.setTextSize(1);
+        lcd.drawString(w.condition, 345, 260);
+    }
+
+    // 5. Giant Digital Time (Updated every second with background overwrite)
     String timeStr = tm.getTimeString(true, g_config.use24Hour);
     lcd.setTextDatum(textdatum_t::middle_center);
     lcd.setTextColor(Colors::AccentCyan, Colors::Background);
     lcd.setTextSize(5);
-    lcd.drawString(timeStr.c_str(), 240, 100);
-
-    // 2. Full Date & Day
-    String dateStr = tm.getDateString();
-    lcd.setTextColor(Colors::TextPrimary, Colors::Background);
-    lcd.setTextSize(2);
-    lcd.drawString(dateStr.c_str(), 240, 160);
-
-    // 3. Location & Timezone Card
-    dm.drawCard(40, 195, 190, 95, "LOCATION");
-    lcd.setTextDatum(textdatum_t::middle_center);
-    lcd.setTextColor(Colors::TextPrimary, Colors::CardBg);
-    lcd.setTextSize(2);
-    lcd.drawString(g_config.locationName, 135, 235);
-    lcd.setTextColor(Colors::TextMuted, Colors::CardBg);
-    lcd.setTextSize(1);
-    lcd.drawString(g_config.timezone, 135, 265);
-
-    // 4. Weather Glance Card
-    dm.drawCard(250, 195, 190, 95, "WEATHER BRIEF");
-    const WeatherData& w = wm.getData();
-    char tempBuf[32];
-    snprintf(tempBuf, sizeof(tempBuf), "%.1f %s", 
-             g_config.useCelsius ? w.temperature : (w.temperature * 1.8f + 32.0f),
-             g_config.useCelsius ? "°C" : "°F");
-    lcd.setTextDatum(textdatum_t::middle_center);
-    lcd.setTextColor(Colors::AccentAmber, Colors::CardBg);
-    lcd.setTextSize(2);
-    lcd.drawString(tempBuf, 345, 235);
-
-    lcd.setTextColor(Colors::TextMuted, Colors::CardBg);
-    lcd.setTextSize(1);
-    lcd.drawString(w.condition, 345, 265);
+    lcd.drawString(timeStr.c_str(), 240, 95);
 }
 
 // ----------------------------------------------------------------------------
 // PAGE 2: LIVE WEATHER
 // ----------------------------------------------------------------------------
-void UIManager::drawWeatherPage() {
+void UIManager::drawWeatherPage(bool fullRedraw) {
+    if (!fullRedraw) return;
+
     DisplayManager& dm = DisplayManager::instance();
     LGFX_NEXORA& lcd = dm.getDisplay();
     dm.clearContentArea();
@@ -168,7 +185,7 @@ void UIManager::drawWeatherPage() {
     dm.drawCard(20, 50, 210, 240, w.location);
 
     char tempBuf[24];
-    snprintf(tempBuf, sizeof(tempBuf), "%.1f°%s", 
+    snprintf(tempBuf, sizeof(tempBuf), "%.1f %s", 
              g_config.useCelsius ? w.temperature : (w.temperature * 1.8f + 32.0f),
              g_config.useCelsius ? "C" : "F");
 
@@ -182,7 +199,7 @@ void UIManager::drawWeatherPage() {
     lcd.drawString(w.condition, 125, 175);
 
     char feelsBuf[32];
-    snprintf(feelsBuf, sizeof(feelsBuf), "Feels like: %.1f°%s", 
+    snprintf(feelsBuf, sizeof(feelsBuf), "Feels: %.1f %s", 
              g_config.useCelsius ? w.feelsLike : (w.feelsLike * 1.8f + 32.0f),
              g_config.useCelsius ? "C" : "F");
     lcd.setTextColor(Colors::TextMuted, Colors::CardBg);
@@ -224,7 +241,9 @@ void UIManager::drawWeatherPage() {
 // ----------------------------------------------------------------------------
 // PAGE 3: 3-DAY WEATHER FORECAST
 // ----------------------------------------------------------------------------
-void UIManager::drawForecastPage() {
+void UIManager::drawForecastPage(bool fullRedraw) {
+    if (!fullRedraw) return;
+
     DisplayManager& dm = DisplayManager::instance();
     LGFX_NEXORA& lcd = dm.getDisplay();
     dm.clearContentArea();
@@ -241,22 +260,23 @@ void UIManager::drawForecastPage() {
         int x = startX + (i * (cardW + gap));
         const ForecastItem& f = (i < w.forecastCount) ? w.forecast[i] : w.forecast[0];
         const char* dayName = (i < w.forecastCount) ? f.day : (i == 0 ? "Today" : (i == 1 ? "Tomorrow" : "Day after"));
+        const char* condStr = (i < w.forecastCount && strlen(f.condition) > 0) ? f.condition : "Partly Cloudy";
 
         dm.drawCard(x, 50, cardW, cardH, dayName);
 
         lcd.setTextDatum(textdatum_t::middle_center);
         lcd.setTextColor(Colors::AccentCyan, Colors::CardBg);
         lcd.setTextSize(2);
-        lcd.drawString(f.condition, x + (cardW / 2), 120);
+        lcd.drawString(condStr, x + (cardW / 2), 120);
 
         char maxBuf[16];
-        snprintf(maxBuf, sizeof(maxBuf), "%.0f°", f.tempMax);
+        snprintf(maxBuf, sizeof(maxBuf), "%.0f C", (i < w.forecastCount) ? f.tempMax : 24.0f);
         lcd.setTextColor(Colors::AccentAmber, Colors::CardBg);
         lcd.setTextSize(3);
         lcd.drawString(maxBuf, x + (cardW / 2), 175);
 
         char minBuf[16];
-        snprintf(minBuf, sizeof(minBuf), "Low: %.0f°", f.tempMin);
+        snprintf(minBuf, sizeof(minBuf), "Low: %.0f C", (i < w.forecastCount) ? f.tempMin : 16.0f);
         lcd.setTextColor(Colors::TextMuted, Colors::CardBg);
         lcd.setTextSize(1);
         lcd.drawString(minBuf, x + (cardW / 2), 225);
@@ -266,7 +286,9 @@ void UIManager::drawForecastPage() {
 // ----------------------------------------------------------------------------
 // PAGE 4: PERSONAL TASKS
 // ----------------------------------------------------------------------------
-void UIManager::drawTasksPage() {
+void UIManager::drawTasksPage(bool fullRedraw) {
+    if (!fullRedraw) return;
+
     DisplayManager& dm = DisplayManager::instance();
     LGFX_NEXORA& lcd = dm.getDisplay();
     dm.clearContentArea();
@@ -275,10 +297,14 @@ void UIManager::drawTasksPage() {
     size_t count = tm.getTaskCount();
 
     if (count == 0) {
+        dm.drawCard(50, 70, 380, 180, "TASK MANAGER");
         lcd.setTextDatum(textdatum_t::middle_center);
-        lcd.setTextColor(Colors::TextMuted, Colors::Background);
+        lcd.setTextColor(Colors::AccentCyan, Colors::CardBg);
         lcd.setTextSize(2);
-        lcd.drawString("All tasks completed!", 240, 160);
+        lcd.drawString("All Tasks Completed!", 240, 140);
+        lcd.setTextColor(Colors::TextMuted, Colors::CardBg);
+        lcd.setTextSize(1);
+        lcd.drawString("Publish MQTT command to create new tasks", 240, 180);
         return;
     }
 
@@ -321,17 +347,27 @@ void UIManager::drawTasksPage() {
 // ----------------------------------------------------------------------------
 // PAGE 5: COUNTDOWN TIMER
 // ----------------------------------------------------------------------------
-void UIManager::drawTimerPage() {
+void UIManager::drawTimerPage(bool fullRedraw) {
     DisplayManager& dm = DisplayManager::instance();
     LGFX_NEXORA& lcd = dm.getDisplay();
-    dm.clearContentArea();
-
     TimerManager& tm = TimerManager::instance();
 
-    // Large Card for Timer
-    dm.drawCard(50, 50, 380, 230, "COUNTDOWN TIMER");
+    if (fullRedraw) {
+        dm.clearContentArea();
 
-    // Formatted time digits (MM:SS)
+        // Large Card for Timer
+        dm.drawCard(50, 50, 380, 230, "COUNTDOWN TIMER");
+
+        // Footer info
+        char durBuf[32];
+        snprintf(durBuf, sizeof(durBuf), "Total Duration: %u min", tm.getTotalDuration() / 60);
+        lcd.setTextDatum(textdatum_t::middle_center);
+        lcd.setTextColor(Colors::TextMuted, Colors::CardBg);
+        lcd.setTextSize(1);
+        lcd.drawString(durBuf, 240, 245);
+    }
+
+    // Formatted time digits (MM:SS) - Updated every second with background overwrite
     String remStr = tm.getFormattedRemaining();
     lcd.setTextDatum(textdatum_t::middle_center);
     lcd.setTextColor(Colors::AccentCyan, Colors::CardBg);
@@ -348,19 +384,14 @@ void UIManager::drawTimerPage() {
     lcd.setTextColor(badgeCol, Colors::CardBg);
     lcd.setTextSize(2);
     lcd.drawString(tm.getStateString(), 240, 195);
-
-    // Footer info
-    char durBuf[32];
-    snprintf(durBuf, sizeof(durBuf), "Total Duration: %u min", tm.getTotalDuration() / 60);
-    lcd.setTextColor(Colors::TextMuted, Colors::CardBg);
-    lcd.setTextSize(1);
-    lcd.drawString(durBuf, 240, 245);
 }
 
 // ----------------------------------------------------------------------------
 // PAGE 6: ALARMS
 // ----------------------------------------------------------------------------
-void UIManager::drawAlarmPage() {
+void UIManager::drawAlarmPage(bool fullRedraw) {
+    if (!fullRedraw) return;
+
     DisplayManager& dm = DisplayManager::instance();
     LGFX_NEXORA& lcd = dm.getDisplay();
     dm.clearContentArea();
@@ -369,10 +400,14 @@ void UIManager::drawAlarmPage() {
     size_t count = am.getAlarmCount();
 
     if (count == 0) {
+        dm.drawCard(50, 70, 380, 180, "ALARM MANAGER");
         lcd.setTextDatum(textdatum_t::middle_center);
-        lcd.setTextColor(Colors::TextMuted, Colors::Background);
+        lcd.setTextColor(Colors::AccentCyan, Colors::CardBg);
         lcd.setTextSize(2);
-        lcd.drawString("No alarms configured", 240, 160);
+        lcd.drawString("No Alarms Configured", 240, 140);
+        lcd.setTextColor(Colors::TextMuted, Colors::CardBg);
+        lcd.setTextSize(1);
+        lcd.drawString("Publish MQTT command to set daily alarms", 240, 180);
         return;
     }
 
@@ -404,37 +439,73 @@ void UIManager::drawAlarmPage() {
 // ----------------------------------------------------------------------------
 // PAGE 7: DEVICE / NETWORK STATUS
 // ----------------------------------------------------------------------------
-void UIManager::drawDeviceStatusPage() {
+void UIManager::drawDeviceStatusPage(bool fullRedraw) {
     DisplayManager& dm = DisplayManager::instance();
     LGFX_NEXORA& lcd = dm.getDisplay();
-    dm.clearContentArea();
-
     DeviceManager& dev = DeviceManager::instance();
 
     int leftW = 210;
     int rightW = 210;
 
-    // Left Card: Device Hardware & System
-    dm.drawCard(20, 50, leftW, 240, "DEVICE TELEMETRY");
+    if (fullRedraw) {
+        dm.clearContentArea();
 
+        // Left Card: Device Hardware & System
+        dm.drawCard(20, 50, leftW, 240, "DEVICE TELEMETRY");
+
+        lcd.setTextDatum(textdatum_t::top_left);
+        lcd.setTextSize(1);
+
+        int y = 80;
+        lcd.setTextColor(Colors::TextMuted, Colors::CardBg);
+        lcd.drawString("Device ID:", 35, y);
+        lcd.setTextColor(Colors::AccentCyan, Colors::CardBg);
+        lcd.drawString(g_config.deviceId, 35, y + 14);
+
+        y += 38;
+        lcd.setTextColor(Colors::TextMuted, Colors::CardBg);
+        lcd.drawString("Firmware Version:", 35, y);
+        lcd.setTextColor(Colors::TextPrimary, Colors::CardBg);
+        lcd.drawString(NEXORA_FIRMWARE_VERSION, 35, y + 14);
+
+        // Right Card: Connectivity
+        dm.drawCard(250, 50, rightW, 240, "CONNECTIVITY");
+
+        y = 80;
+        lcd.setTextColor(Colors::TextMuted, Colors::CardBg);
+        lcd.drawString("Wi-Fi Network:", 265, y);
+        lcd.setTextColor(Colors::AccentCyan, Colors::CardBg);
+        lcd.drawString(WiFi.status() == WL_CONNECTED ? WiFi.SSID().c_str() : "Disconnected", 265, y + 14);
+
+        y += 38;
+        lcd.setTextColor(Colors::TextMuted, Colors::CardBg);
+        lcd.drawString("IP Address:", 265, y);
+        lcd.setTextColor(Colors::TextPrimary, Colors::CardBg);
+        lcd.drawString(WiFi.status() == WL_CONNECTED ? WiFi.localIP().toString().c_str() : "None", 265, y + 14);
+
+        y += 38;
+        lcd.setTextColor(Colors::TextMuted, Colors::CardBg);
+        lcd.drawString("Wi-Fi RSSI:", 265, y);
+        char rssiBuf[24];
+        snprintf(rssiBuf, sizeof(rssiBuf), "%d dBm", WiFi.RSSI());
+        lcd.setTextColor(Colors::TextPrimary, Colors::CardBg);
+        lcd.drawString(WiFi.status() == WL_CONNECTED ? rssiBuf : "N/A", 265, y + 14);
+
+        y += 38;
+        lcd.setTextColor(Colors::TextMuted, Colors::CardBg);
+        lcd.drawString("MQTT Broker:", 265, y);
+        bool online = (dev.getState() == DeviceState::ONLINE);
+        lcd.setTextColor(online ? Colors::SuccessGreen : Colors::AlertRed, Colors::CardBg);
+        lcd.drawString(online ? "Connected" : "Disconnected", 265, y + 14);
+    }
+
+    // Dynamic metrics on Left Card (Updated every second with background overwrite)
     lcd.setTextDatum(textdatum_t::top_left);
     lcd.setTextSize(1);
 
-    int y = 80;
+    int y = 80 + 38 + 38;
     lcd.setTextColor(Colors::TextMuted, Colors::CardBg);
-    lcd.drawString("Device ID:", 35, y);
-    lcd.setTextColor(Colors::AccentCyan, Colors::CardBg);
-    lcd.drawString(g_config.deviceId, 35, y + 14);
-
-    y += 38;
-    lcd.setTextColor(Colors::TextMuted, Colors::CardBg);
-    lcd.drawString("Firmware Version:", 35, y);
-    lcd.setTextColor(Colors::TextPrimary, Colors::CardBg);
-    lcd.drawString(NEXORA_FIRMWARE_VERSION, 35, y + 14);
-
-    y += 38;
-    lcd.setTextColor(Colors::TextMuted, Colors::CardBg);
-    lcd.drawString("Uptime:", 35, y);
+    lcd.drawString("Uptime:                 ", 35, y);
     char upBuf[24];
     snprintf(upBuf, sizeof(upBuf), "%u seconds", dev.getUptimeSeconds());
     lcd.setTextColor(Colors::TextPrimary, Colors::CardBg);
@@ -442,39 +513,9 @@ void UIManager::drawDeviceStatusPage() {
 
     y += 38;
     lcd.setTextColor(Colors::TextMuted, Colors::CardBg);
-    lcd.drawString("Free RAM Heap:", 35, y);
+    lcd.drawString("Free RAM Heap:          ", 35, y);
     char ramBuf[24];
     snprintf(ramBuf, sizeof(ramBuf), "%u KB", dev.getFreeHeap() / 1024);
     lcd.setTextColor(Colors::AccentAmber, Colors::CardBg);
     lcd.drawString(ramBuf, 35, y + 14);
-
-    // Right Card: Connectivity
-    dm.drawCard(250, 50, rightW, 240, "CONNECTIVITY");
-
-    y = 80;
-    lcd.setTextColor(Colors::TextMuted, Colors::CardBg);
-    lcd.drawString("Wi-Fi Network:", 265, y);
-    lcd.setTextColor(Colors::AccentCyan, Colors::CardBg);
-    lcd.drawString(WiFi.status() == WL_CONNECTED ? WiFi.SSID().c_str() : "Disconnected", 265, y + 14);
-
-    y += 38;
-    lcd.setTextColor(Colors::TextMuted, Colors::CardBg);
-    lcd.drawString("IP Address:", 265, y);
-    lcd.setTextColor(Colors::TextPrimary, Colors::CardBg);
-    lcd.drawString(WiFi.status() == WL_CONNECTED ? WiFi.localIP().toString().c_str() : "None", 265, y + 14);
-
-    y += 38;
-    lcd.setTextColor(Colors::TextMuted, Colors::CardBg);
-    lcd.drawString("Wi-Fi RSSI:", 265, y);
-    char rssiBuf[24];
-    snprintf(rssiBuf, sizeof(rssiBuf), "%d dBm", WiFi.RSSI());
-    lcd.setTextColor(Colors::TextPrimary, Colors::CardBg);
-    lcd.drawString(WiFi.status() == WL_CONNECTED ? rssiBuf : "N/A", 265, y + 14);
-
-    y += 38;
-    lcd.setTextColor(Colors::TextMuted, Colors::CardBg);
-    lcd.drawString("MQTT Broker:", 265, y);
-    bool online = (dev.getState() == DeviceState::ONLINE);
-    lcd.setTextColor(online ? Colors::SuccessGreen : Colors::AlertRed, Colors::CardBg);
-    lcd.drawString(online ? "Connected" : "Disconnected", 265, y + 14);
 }
